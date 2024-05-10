@@ -3,13 +3,52 @@ from math import ceil
 import numpy as np
 from matplotlib import pyplot as plt
 import seaborn as sns
-
 VarColors = {
-    'Voltage': 'r',
-    'Current': 'b',
-    'Position': 'k',
-    'Force': 'g',
-    'Power': 'purple'}
+    'Voltage': {'LineKwarg': {'color': 'r',
+                              },
+                # 'Limits': (-180, 180),
+                'Label': 'Voltage [V]'
+                },
+    'Current': {'LineKwarg': {'color': 'b',
+                              },
+                # 'Limits': (-15, 15),
+                'Factor': 1e6,
+                'Label': 'Current [uA]'
+                },
+    'Position': {'LineKwarg': {'color': 'k',
+                               'linestyle': 'dashed',
+                               'linewidth': 0.5,
+                               },
+                 # 'Limits': (-5, 5),
+                 'Label': 'Position [mm]'
+                 },
+    'Force': {'LineKwarg': {'color': 'g',
+                            'linestyle': 'dashed',
+                            'linewidth': 0.5,
+                            },
+              # 'Limits': (-5, 5),
+              'Label': 'Force [N]'
+              },
+    'Acceleration': {'LineKwarg': {'color': 'orange',
+                                   'linestyle': 'dashed',
+                                   'linewidth': 0.5,
+                                   },
+                     # 'Limits': (-20, 20),
+                     'Label': 'Acceleration [m/s^2]'
+                     },
+    'Velocity': {'LineKwarg': {'color': 'brown',
+                               'linestyle': 'dashed',
+                               'linewidth': 0.5,
+                               },
+                 # 'Limits': (-0.3, 0.3),
+                 'Label': 'Velocity [m/s]'
+                 },
+    'Power': {'LineKwarg': {'color': 'purple',
+                            },
+              'Factor': 1e6,
+              # 'Limits': (0, 1000),
+              'Label': 'Power [uW]'},
+}
 
 def GenFigure(dfData, xVar='Time', PlotColumns=None, ax=None, axisFactor=0.2, **kwargs):
     """
@@ -36,10 +75,10 @@ def GenFigure(dfData, xVar='Time', PlotColumns=None, ax=None, axisFactor=0.2, **
     axp = None
     AxsDict = {}
     ic = 0
-    for col, color in PlotColumns.items():
-        if col == xVar:
+    for var, prop in PlotColumns.items():
+        if var == xVar:
             continue
-        if col not in dfData.columns:
+        if var not in dfData.columns:
             continue
 
         if axp is None:
@@ -49,10 +88,19 @@ def GenFigure(dfData, xVar='Time', PlotColumns=None, ax=None, axisFactor=0.2, **
         if ic > 1:
             axp.spines.right.set_position(("axes", 1 + (axisFactor * (ic - 1))))
         ic += 1
-        axp.set_ylabel(col)
+        if 'Label' in prop:
+            axp.set_ylabel(prop['Label'])
+        else:
+            axp.set_ylabel(var)
+
+        color = prop['LineKwarg']['color']
         axp.yaxis.label.set_color(color)
         axp.tick_params(axis='y', colors=color)
-        AxsDict[col] = axp
+
+        if 'Limits' in prop:
+            axp.set_ylim(prop['Limits'][0], prop['Limits'][1])
+
+        AxsDict[var] = axp
 
     return AxsDict, PlotColumns
 

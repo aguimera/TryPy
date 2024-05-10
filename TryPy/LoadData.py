@@ -8,6 +8,7 @@ MotColumnRenames = {
     'Time(s)': 'Time',
     'MC SW Overview - Actual Position(mm)': 'Position',
     'MC SW Force Control - Measured Force(N)': 'Force',
+    'MC SW Overview - Actual Velocity(m/s)': 'Velocity',
 }
 
 DQAColumnRenames = {
@@ -35,6 +36,12 @@ def LoadMotorFile(MotorFile):
     dfMOT = dfMOT.drop(columns=dropcols)
     # rename columns
     dfMOT = dfMOT.rename(columns=MotColumnRenames)
+    # Estimate Velocity
+    if 'Velocity' not in dfMOT.columns:
+        dfMOT['Velocity'] = (dfMOT.Position.diff() / 1000) / dfMOT.Time.diff()
+    # Estimate Acceleration
+    if 'Acceleration' not in dfMOT.columns:
+        dfMOT['Acceleration'] = dfMOT.Velocity.diff() / dfMOT.Time.diff()
     return dfMOT
 
 
