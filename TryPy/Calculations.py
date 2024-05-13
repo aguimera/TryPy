@@ -4,6 +4,65 @@ from scipy.integrate import simpson
 import pandas as pd
 
 
+def ExtractCyclesByPos(dfData, ContactPosition=8, Latency=10e-3):
+
+    dt = dfData.Time[dfData['Position'] < ContactPosition].diff()
+    StartIds = np.where(dt > Latency)[0]
+    StartIds = np.hstack((0, StartIds))
+    Indexes = dt.index.values
+    StartIndexes = Indexes[StartIds]
+    EndIndexes = Indexes[StartIds - 1][1:]
+    EndIndexes = np.hstack((EndIndexes, Indexes[-1]))
+
+    # Calculate Duration
+    # Calculate Maximum Duration
+    nSampsCycle = EndIndexes - StartIndexes
+    print('Cycles Samples', nSampsCycle)
+    nSampsCycle = np.max(nSampsCycle)
+
+    # Debug
+    # Duration = dfData.Time[EndIndexs].values - dfData.Time[StartIndexs].values
+    # print('Cycles Duration')
+    # print(Duration)
+
+    CyclesList = []
+    for ic, st in enumerate(StartIndexes):
+        # TODO parametrize this step
+        # Set all cycles to same size
+        ed = st + nSampsCycle
+        if ed > dfData.shape[0]:
+            ed = dfData.shape[0] - 1
+        # Extract Cycle
+        data = dfData[st:ed].copy()
+
+        # Reset cycle time to zero
+        data.reset_index(inplace=True, drop=True)
+        data.loc[:, 'Time'] = data.Time.values - data.Time[0]
+
+        Cycle = {'Data': data,  # Dataframe with recorded data
+                 'Cycle': ic,  # Cycle number
+                 'tStart': dfData.Time[st],  # Cycle Start time
+                 'LocStart': dfData.Position[st],  # Cycle Start position
+                 'tEnd': dfData.Time[ed],  # Cycle End time
+                 'LocEnd': dfData.Position[ed],  # Cycle End position
+                 'CycleDuration': dfData.Time[ed] - dfData.Time[st],  # Cycle Duration
+                 }
+        CyclesList.append(Cycle)
+
+    return CyclesList
+
+def FindTransitionTime(dfCycles, CurrentTh=None):
+
+    for index, row in dfCycles.iterrows():
+        if CurrentTh is None:
+            IndHalf = int(row.Data.shape[0] / 2)
+            dfCycles.loc[index, 'tTransition'] = row.Data.Time[IndHalf]
+            dfCycles.loc[index, 'iTransition'] = row.Data.Time[IndHalf]
+            continue
+
+    return dfCycles
+
+
 def ExtractCycles(dfData, ContactPosition=8, ContactForce=None, Latency=10e-3, CurrentTh=None):
     """
     Extracts cycles from the given dataframe based on the specified ContactPosition or ContactForce.
@@ -41,24 +100,30 @@ def ExtractCycles(dfData, ContactPosition=8, ContactForce=None, Latency=10e-3, C
         print('Please specify ContactForce or ContactPosition')
         return None
 
-    # Calculate Duration
-    Duration = dfData.Time[EndIndexs].values - dfData.Time[StartIndexs].values
+    # Calculate Maximum Duration
     nSampsCycle = EndIndexs - StartIndexs
-    print('Cycles Duration')
-    print(Duration)
-    print('Cycles Samples')
-    print(nSampsCycle)
+    print('Cycles Samples', nSampsCycle)
     nSampsCycle = np.max(nSampsCycle)
+
+    # Debug
+    # Duration = dfData.Time[EndIndexs].values - dfData.Time[StartIndexs].values
+    # print('Cycles Duration')
+    # print(Duration)
 
     CyclesList = []
     for ic, st in enumerate(StartIndexs[:-1]):
+        # TODO parametrize this step
+        # Set all cycles to same size
         ed = st + nSampsCycle
         if ed > dfData.shape[0]:
             ed = dfData.shape[0]-1
+        # Extract Cycle
         data = dfData[st:ed].copy()
+
+        # Reset cycle time to zero
         data.reset_index(inplace=True, drop=True)
         data.loc[:, 'Time'] = data.Time.values - data.Time[0]
-        # Calculate sign transition time
+
 
         if CurrentTh is None:
             IndHalf = int(data.shape[0] / 2)
