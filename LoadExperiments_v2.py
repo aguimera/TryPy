@@ -154,6 +154,7 @@ for index, r in dfExps.iterrows():
 plt.ion()
 PDF.close()
 
+dfCycles.reset_index(inplace=True, drop=True)
 dfCycles = dfCycles.astype({'Gain': float,
                             'Req': float,
                             })

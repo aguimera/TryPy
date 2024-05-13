@@ -57,7 +57,7 @@ def FindTransitionTime(dfCycles, CurrentTh=None):
         if CurrentTh is None:
             IndHalf = int(row.Data.shape[0] / 2)
             dfCycles.loc[index, 'tTransition'] = row.Data.Time[IndHalf]
-            dfCycles.loc[index, 'iTransition'] = row.Data.Time[IndHalf]
+            dfCycles.loc[index, 'iTransition'] = IndHalf
             continue
 
     return dfCycles
