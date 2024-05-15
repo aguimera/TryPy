@@ -15,7 +15,7 @@ PDF = PdfPages('./Reports/DataSetsAnalysis.pdf')
 
 # %% Load data
 
-FileIn = './DataSets/Cycles-Experiments_debug_AGB.pkl'
+FileIn = './DataSets/Cycles-ExperimentsT1T2CurvesR.pkl'
 dfData = pd.read_pickle(FileIn)
 
 
@@ -208,3 +208,31 @@ for ex, dExp in dSel.groupby('ExpId'):
 #
 # print(f'Animation saved as {animation_file}')
 PDF.close()
+
+
+#%%
+fig, ax = plt.subplots()
+sns.stripplot(data=dfData,
+              x='Req',
+              y='Energy',
+              hue='TribuId',
+              ax=ax,
+              )
+
+fig, ax = plt.subplots()
+sns.scatterplot(data=dfData,
+                  x='Req',
+                  y='Energy',
+                  hue='TribuId',
+                  ax=ax,
+                  )
+
+
+fig, ax = plt.subplots()
+sns.boxplot(data=dfData,
+              x='TribuId',
+              y='Energy',
+              order=['SwTENG-R', 'SwTENG-RF2', 'SwTENG-RF3'],
+              #hue='Comments',
+              ax=ax,
+              )

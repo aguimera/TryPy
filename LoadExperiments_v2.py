@@ -22,7 +22,10 @@ plt.ion()  #activar las graficas que se vean y que no se escondan
 DataDir = './Data/'
 LoadsDef = './Data/LoadsDescription.ods'
 
-ExpDef = './Data/Experiments_debug_AGB.ods'
+ExpDef = './Data/ExperimentsT1T2CurvesR.xlsx'
+# ExpDef = './Data/Experiments_debug_AGB.ods'
+# ExpDef = './Data/Experiments_debug_AGB.ods'
+
 # Output Files definition rename if needed
 PDF = PdfPages('./Reports/LoadReport-{}.pdf'.format(ExpDef.split('/')[-1].split('.')[0]))
 OutFile = './DataSets/Cycles-{}.pkl'.format(ExpDef.split('/')[-1].split('.')[0])
