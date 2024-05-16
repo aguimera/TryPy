@@ -15,7 +15,7 @@ PDF = PdfPages('./Reports/DataSetsAnalysis.pdf')
 
 # %% Load data
 
-FileIn = './DataSets/Cycles-ExperimentsT1T2CurvesR.pkl'
+FileIn = './DataSets/Cycles-ExperimentsT1_500_T2_500CurvesR.pkl'
 dfData = pd.read_pickle(FileIn)
 
 
@@ -44,13 +44,14 @@ PlotPars = ('CurrentMax',
 fig, axs = PlotScalarValues(dfData=dfData,
                             PlotPars=PlotPars,
                             xVar='Req',
-                            hueVar='TribuId',
+                            hueVar='Contact Time(ms)',
                             PltFunt=sns.scatterplot)
 
 
 # %% compare positive and negative peaks
 
-dSel = dfData.query("TribuId == 'SwTENG-R' ")
+
+dSel = dfData
 fig, ax = plt.subplots()
 sns.lineplot(data=dSel,
              x='Req',
@@ -70,7 +71,7 @@ sns.lineplot(data=dSel,
 ax.set_xscale('log')
 ax.set_yscale('log')
 ax.set_xlabel('Load Resistance (Ohm)')
-ax.set_ylabel('Energy (J)')
+ax.set_ylabel('Energy per cycle (J)')
 ax.legend()
 PDF.savefig(fig)
 
@@ -87,7 +88,7 @@ sns.scatterplot(data=dfData, x='ExpId', y='NegativeEnergy', ax=ax, label='NegEne
 sns.scatterplot(data=dfData, x='ExpId', y='Energy', ax=ax, label='Energy', color='green')
 
 ax.set_xlabel('ExpId')
-ax.set_ylabel('Energy (J)')
+ax.set_ylabel('Energy per cycle (J)')
 ax.legend()
 
 plt.xticks(rotation=45)  # Rotar las etiquetas del eje x para una mejor legibilidad

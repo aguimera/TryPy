@@ -22,8 +22,8 @@ plt.ion()  #activar las graficas que se vean y que no se escondan
 DataDir = './Data/'
 LoadsDef = './Data/LoadsDescription.ods'
 
-ExpDef = './Data/ExperimentsT1T2CurvesR.xlsx'
-
+#ExpDef = './Data/ExperimentsT1_0_T2_500CurvesR.xlsx'
+ExpDef = './Data/ExperimentsT1_500_T2_500CurvesR.xlsx'
 
 # Output Files definition rename if needed
 PDF = PdfPages('./Reports/LoadReport-{}.pdf'.format(ExpDef.split('/')[-1].split('.')[0]))
