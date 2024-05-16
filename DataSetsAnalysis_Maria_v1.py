@@ -15,7 +15,7 @@ PDF = PdfPages('./Reports/DataSetsAnalysis.pdf')
 
 # %% Load data
 
-FileIn = './DataSets/Cycles-ExperimentsT1_500_T2_500CurvesR.pkl'
+FileIn = './DataSets/Cycles-ExperimentsT1T2CurvesR.pkl'
 dfData = pd.read_pickle(FileIn)
 
 
@@ -57,16 +57,19 @@ sns.lineplot(data=dSel,
              x='Req',
              y='PositiveEnergy',
              ax=ax,
+             #hue='Contact Time(ms)',
              label='PositiveEnergy')
 sns.lineplot(data=dSel,
              x='Req',
              y='NegativeEnergy',
              ax=ax,
+             #hue='Contact Time(ms)',
              label='NegativeEnergy')
 sns.lineplot(data=dSel,
              x='Req',
              y='Energy',
              ax=ax,
+             #hue='Contact Time(ms)',
              label='Energy')
 ax.set_xscale('log')
 ax.set_yscale('log')
@@ -82,13 +85,13 @@ PDF.savefig(fig)
 # Configurar el gráfico
 fig, ax = plt.subplots(figsize=(10, 6))
 fig.suptitle('Contact Time Effect')
-# Trazar los puntos para PosEnergy, NegEnergy y Energy en función de ExpId
-sns.scatterplot(data=dfData, x='ExpId', y='PositiveEnergy', ax=ax, label='PosEnergy', color='blue')
-sns.scatterplot(data=dfData, x='ExpId', y='NegativeEnergy', ax=ax, label='NegEnergy', color='red')
-sns.scatterplot(data=dfData, x='ExpId', y='Energy', ax=ax, label='Energy', color='green')
-
-ax.set_xlabel('ExpId')
+# Trazar los puntos para Contact time en funcion de los req y la energia
+sns.scatterplot(data=dfData, x='Req', y='Energy', ax=ax, hue='Contact Time(ms)')
+ax.set_xscale('log')
+ax.set_yscale('log')
+ax.set_xlabel('Req')
 ax.set_ylabel('Energy per cycle (J)')
+ax.set_xlabel('Load Resistance(Ohm)')
 ax.legend()
 
 plt.xticks(rotation=45)  # Rotar las etiquetas del eje x para una mejor legibilidad
@@ -121,7 +124,8 @@ VarColors = {
                  # 'Limits': (-5, 5),
                  'Label': 'Position [mm]'
                  },
-    'Force': {'LineKwarg': {'color': 'g',
+}
+""" 'Force': {'LineKwarg': {'color': 'g',
                             'linestyle': 'dashed',
                             'linewidth': 0.5,
                             },
@@ -146,8 +150,10 @@ VarColors = {
                             },
               'Factor': 1e6,
               'Limits': (0, 1000),
-              'Label': 'Power [uW]'},
-}
+              'Label': 'Power [uW]'},'
+
+"""
+
 
 
 dSel = dfData
