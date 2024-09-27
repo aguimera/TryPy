@@ -18,15 +18,14 @@ mpl.use("QtAgg")  #backend es la herramienta de visor de graficas
 plt.close('all')  #cerrar todas las graficas antes de empezar
 plt.ion()  #activar las graficas que se vean y que no se escondan
 
-DataFolder = '/home/aguimera/PycharmProjects/TryPy_DataFolder/'
+# Main Root Data Folder
+DataFolder = "S:/Users/Maria/DataTENG/ExpResistance/"
 
 #definimos entradas y salidas
 DataDir = DataFolder + 'RawData/'
 LoadsDef = DataFolder + 'RawData/LoadsDescription.ods'
-
 ExpDef = DataFolder + 'RawData/ExperimentsT1T2CurvesR.xlsx'
-# ExpDef = './Data/Experiments_debug_AGB.ods'
-# ExpDef = './Data/Experiments_debug_AGB.ods'
+
 
 # Output Files definition rename if needed
 PDF = PdfPages(DataFolder + 'Reports/LoadReport-{}.pdf'.format(ExpDef.split('/')[-1].split('.')[0]))
