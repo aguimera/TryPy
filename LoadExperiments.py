@@ -21,6 +21,9 @@ plt.ion()  #activar las graficas que se vean y que no se escondan
 # Main Root Data Folder
 DataFolder = "S:/Users/Maria/DataTENG/ExpResistance/"
 
+
+# esto es una prueba
+
 #definimos entradas y salidas
 DataDir = DataFolder + 'RawData/'
 LoadsDef = DataFolder + 'RawData/LoadsDescription.ods'
