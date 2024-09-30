@@ -9,10 +9,10 @@ from matplotlib.backends.backend_pdf import PdfPages
 from scipy.integrate import simpson
 from TryPy.PlotData import PlotScalarValues, GenFigure
 
-# %% Load data
-DataFolder = '/home/aguimera/PycharmProjects/TryPy_DataFolder/'
+# %% Load data from S:
+DataFolder = 'S:/Users/Maria/DataTENG/ExpMotorParameters/'
 
-FileIn = DataFolder + 'DataSets/Cycles-ExperimentsT1T2CurvesR.pkl'
+FileIn = DataFolder + 'DataSets/Cycles-ExperimentsPendiente.pkl'
 dfData = pd.read_pickle(FileIn)
 
 PDF = PdfPages(DataFolder + 'Reports/DataSetsAnalysis.pdf')
