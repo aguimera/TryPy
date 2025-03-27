@@ -19,7 +19,7 @@ plt.close('all')  #cerrar todas las graficas antes de empezar
 plt.ion()  #activar las graficas que se vean y que no se escondan
 
 # Main Root Data Folder
-DataFolder = "S:/Users/Maria/DataTENG/ExpMotorParameters/"
+DataFolder = "S:/Users/Maria/DataTENG/ExpResistance/"
 
 #definimos entradas y salidas
 DataDir = DataFolder + 'RawData/'

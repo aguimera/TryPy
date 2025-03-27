@@ -14,6 +14,8 @@ from TryPy.PlotData import GenFigure
 # Analisis Estadistico con pandas. boxplots etc.
 import seaborn as sns
 
+# From this .py, data will be loaded and a report with raw data graphs will be generated
+
 mpl.use("QtAgg")  #backend es la herramienta de visor de graficas
 plt.close('all')  #cerrar todas las graficas antes de empezar
 plt.ion()  #activar las graficas que se vean y que no se escondan
@@ -26,18 +28,20 @@ DataFolder = "S:/Users/Maria/DataTENG/ExpResistance/"
 #definimos entradas y salidas
 DataDir = DataFolder + 'RawData/'
 LoadsDef = DataFolder + 'RawData/LoadsDescription.ods'
-ExpDef = DataFolder + 'RawData/ExperimentsT1T2CurvesR.xlsx'
+#WRITE HERE THE EXCEL NAME OF THE EXPERIMENT TO SELECT  DATA TO PROCESS
+ExpDef = DataFolder + 'RawData/Experiments.ods'
 
 
 # Output Files definition rename if needed
+# Creates a PDF in Reports folder with the name LoadReports-ExpDef(previously specified)
 PDF = PdfPages(DataFolder + 'Reports/LoadReport-{}.pdf'.format(ExpDef.split('/')[-1].split('.')[0]))
 OutFile = DataFolder + 'DataSets/Cycles-{}.pkl'.format(ExpDef.split('/')[-1].split('.')[0])
 
 # %% Load Experiments file
 dfExp = pd.read_excel(ExpDef)
 
-# If needed implement some selection here
-dfExps = dfExp
+# If needed implement some data selection here from the excel
+dfExps = dfExp.query("TribuId == 'SwTENG-R'")
 
 # %% Load Loads file
 dfLoads = pd.read_excel(LoadsDef)

@@ -159,22 +159,29 @@ for ex, dExp in dSel.groupby('ExpId'):
                                PlotColumns=VarColors,
                                axisFactor=0.15,
                                ax=axtime)
+
         legend_elements = [] # modify
+
         for index, r in df.iterrows():
             Data = r.Data
+
             for var, ax in AxsDict.items():
+
                 if 'Factor' in VarColors[var]:
                     ptdata = Data[var] * VarColors[var]['Factor']
                 else:
                     ptdata = Data[var]
                 ax.plot(Data['Time'], ptdata, **VarColors[var]['LineKwarg'])
 
+                #Plot the line that separates the positive/negative peaks
+                #ax.axvline(x=r.tTransition, color='y')
+                ax.set_xlabel('Time')
 
-
-                ax.axvline(x=r.tTransition, color='y')
-            ax.set_xlabel('Time')
-
-        line = axtime.plot([], [], label=VarColors[var]['Label'], **VarColors[var]['LineKwarg'])[0]  # modify
+        line = axtime.plot([], [], label=VarColors['Voltage']['Label'], **VarColors['Voltage']['LineKwarg'])[0]  # modify
+        legend_elements.append(line)  # modify
+        line = axtime.plot([], [], label=VarColors['Current']['Label'], **VarColors['Current']['LineKwarg'])[0]  # modify
+        legend_elements.append(line)  # modify
+        line = axtime.plot([], [], label=VarColors['Position']['Label'], **VarColors['Position']['LineKwarg'])[0]  # modify
         legend_elements.append(line)  # modify
 
         axtime.legend()  # modify
