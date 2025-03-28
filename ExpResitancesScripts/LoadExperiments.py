@@ -1,3 +1,4 @@
+# From this .py, data will be loaded and a report with raw data graphs will be generated
 #Importar librerias
 import numpy as np  #importa la libreria numpy con el nombre np. Analisis matricial y matematica, tipo matlab
 import pandas as pd  #importa la libreria pandas con el nombre pd. Manejo de tablas de datos, tipo excel.
@@ -6,7 +7,7 @@ import matplotlib.pyplot as plt  #importa la libreria de graficas
 import matplotlib as mpl
 from matplotlib.backends.backend_pdf import PdfPages  #importar libreria para hacer pdfs
 
-#Arcgivos que seran Exportable. Importo las librerias que anton ha creado para el proyecto.
+#Archivos que seran Exportable. Importo las librerias que anton ha creado para el proyecto.
 from TryPy.Calculations import ExtractCyclesByPos, FindTransitionTime
 from TryPy.LoadData import Loadfiles
 from TryPy.PlotData import GenFigure
@@ -14,7 +15,7 @@ from TryPy.PlotData import GenFigure
 # Analisis Estadistico con pandas. boxplots etc.
 import seaborn as sns
 
-# From this .py, data will be loaded and a report with raw data graphs will be generated
+
 
 mpl.use("QtAgg")  #backend es la herramienta de visor de graficas
 plt.close('all')  #cerrar todas las graficas antes de empezar
@@ -45,6 +46,7 @@ dfExps = dfExp.query("TribuId == 'SwTENG-R'")
 
 # %% Load Loads file
 dfLoads = pd.read_excel(LoadsDef)
+
 # TODO implement it in the LoadsFile
 dfLoads.Req = dfLoads.Req * 1000  # Convert to ohms
 
@@ -126,7 +128,8 @@ for index, r in dfExps.iterrows():
     # Stack Cycles for all experiments
     dfCycles = pd.concat([dfCycles, dfCycle])
 
-    # Generate Debug Figures
+    # Generate Debug Raw Figures
+    # Plotea en funcion de tiempo
     XVar = 'Time'
     AxsDict, VarColors = GenFigure(dfData, xVar=XVar, axisFactor=0.1, figsize=(12, 5))
     for var, ax in AxsDict.items():
@@ -134,17 +137,20 @@ for index, r in dfExps.iterrows():
             ptdata = dfData[var] * VarColors[var]['Factor']
         else:
             ptdata = dfData[var]
-        ax.plot(dfData[XVar], ptdata, **VarColors[var]['LineKwarg'])
+        ax.plot(dfData[XVar], ptdata, **VarColors[var]['LineKwarg']) # Plotea cada columna
 
+    # Generates yellow separation lines to start, end of the cycles
     for index, r in dfCycle.iterrows():
         ax.axvline(x=r.tStart, color='y', linewidth=2)
         ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=2)
         ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=1)
+
     fig = ax.get_figure()
     fig.suptitle(r.ExpId)
     fig.tight_layout()
     PDF.savefig(fig, bbox_inches='tight')
 
+    # Plotea en funcion de posicion
     XVar = 'Position'
     AxsDict, VarColors = GenFigure(dfData, xVar=XVar, figsize=(12, 5))
     for var, ax in AxsDict.items():

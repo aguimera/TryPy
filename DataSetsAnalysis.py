@@ -1,3 +1,4 @@
+from cProfile import label
 from math import ceil
 
 import numpy as np
@@ -9,220 +10,245 @@ from matplotlib.backends.backend_pdf import PdfPages
 from scipy.integrate import simpson
 from TryPy.PlotData import PlotScalarValues, GenFigure
 
-# %% Load data from S:
-DataFolder = 'S:/Users/Maria/DataTENG/ExpMotorParameters/'
+def work_DataSetsAnalysis(DataFolder):
+    # %% Load data
+    # DataFolder = 'S:/Users/Maria/DataTENG/ExpResistance/'
 
-FileIn = DataFolder + 'DataSets/Cycles-ExperimentsPendiente.pkl'
-dfData = pd.read_pickle(FileIn)
+    #Takes the kpl generated in LoadExperiments and process it
+    FileIn = DataFolder + 'DataSets/Cycles-Experiments.pkl'
+    dfData = pd.read_pickle(FileIn)
 
-PDF = PdfPages(DataFolder + 'Reports/DataSetsAnalysis.pdf')
-
-
-# %% add new calculations example
-for index, r in dfData.iterrows():
-    cyData = r.Data
-    dfData.loc[index, 'VoltageMax'] = cyData.Voltage.max()
-    dfData.loc[index, 'VoltageMin'] = cyData.Voltage.min()
-    dfData.loc[index, 'Energy'] = simpson(y=cyData.Power, x=cyData.Time)
-    IndHalf = int(r.iTransition)
-    dfData.loc[index, 'PositiveEnergy'] = simpson(y=cyData.Power[:IndHalf], x=cyData.Time[:IndHalf])
-    dfData.loc[index, 'NegativeEnergy'] = simpson(y=cyData.Power[IndHalf:], x=cyData.Time[IndHalf:])
+    #Generate new pdf report called DataSetsAnalysis
+    PDF = PdfPages(DataFolder + 'Reports/DataSetsAnalysis.pdf')
 
 
-# %% Plot experiments comparison
-
-PlotPars = ('CurrentMax',
-            'CurrentMin',
-            'CurrentMaxPosition',
-            'CurrentMinPosition',)
-
-fig, axs = PlotScalarValues(dfData=dfData,
-                            PlotPars=PlotPars,
-                            xVar='Req',
-                            hueVar='TribuId',
-                            PltFunt=sns.scatterplot)
+    # %% add new calculations example
+    for index, r in dfData.iterrows():
+        cyData = r.Data
+        dfData.loc[index, 'VoltageMax'] = cyData.Voltage.max()
+        dfData.loc[index, 'VoltageMin'] = cyData.Voltage.min()
+        dfData.loc[index, 'Energy'] = simpson(y=cyData.Power, x=cyData.Time)
+        IndHalf = int(r.iTransition)
+        dfData.loc[index, 'PositiveEnergy'] = simpson(y=cyData.Power[:IndHalf], x=cyData.Time[:IndHalf])
+        dfData.loc[index, 'NegativeEnergy'] = simpson(y=cyData.Power[IndHalf:], x=cyData.Time[IndHalf:])
 
 
-# %% compare positive and negative peaks
+    # %% Plot experiments comparison
+    # Here you specify which variables will be plotted
+    PlotPars = ('CurrentMax',
+                'CurrentMin',
+                'CurrentMaxPosition',
+                'CurrentMinPosition',)
 
-dSel = dfData.query("TribuId == 'SwTENG-R' ")
-fig, ax = plt.subplots()
-sns.lineplot(data=dSel,
-             x='Req',
-             y='PositiveEnergy',
-             ax=ax,
-             label='PositiveEnergy')
-sns.lineplot(data=dSel,
-             x='Req',
-             y='NegativeEnergy',
-             ax=ax,
-             label='NegativeEnergy')
-sns.lineplot(data=dSel,
-             x='Req',
-             y='Energy',
-             ax=ax,
-             label='Energy')
-# ax.set_xscale('log')
-# ax.set_yscale('log')
-ax.set_xlabel('Load Resistance (Ohm)')
-ax.set_ylabel('Energy (J)')
-ax.legend()
-PDF.savefig(fig)
+    fig, axs = PlotScalarValues(dfData=dfData,
+                                PlotPars=PlotPars,
+                                xVar='Req',
+                                hueVar='TribuId',
+                                PltFunt=sns.scatterplot)
 
 
+    # %% compare positive and negative peaks
+    dSel = dfData.query("TribuId == 'SwTENG-R' ")
+    fig, ax = plt.subplots()
+    sns.lineplot(data=dSel,
+                 x='Req',
+                 y='PositiveEnergy',
+                 ax=ax,
+                 color= 'black',
+                 label='PositiveEnergy')
+    sns.lineplot(data=dSel,
+                 x='Req',
+                 y='NegativeEnergy',
+                 ax=ax,
+                 color=(0.5, 0.5, 0.5), #dark gray colour
+                 label='NegativeEnergy')
+    sns.lineplot(data=dSel,
+                 x='Req',
+                 y='Energy',
+                 ax=ax,
+                 color=(0.8, 0.8, 0.8),  # Medium gray color
+                 label='Energy')
+    # ax.set_xscale('log')
+    # ax.set_yscale('log')
+    ax.set_xlabel('Load Resistance (Ohm)')
+    ax.set_ylabel('Energy (J)')
+    ax.legend()
+    PDF.savefig(fig)
 
-# Gráfica para Energia en función de T1 Y T2
-# Obtener los nombres de los diferentes valores de ExpId
-# Configurar el gráfico
-fig, ax = plt.subplots(figsize=(10, 6))
-fig.suptitle('Contact Time Effect')
-# Trazar los puntos para PosEnergy, NegEnergy y Energy en función de ExpId
-sns.scatterplot(data=dfData, x='ExpId', y='PositiveEnergy', ax=ax, label='PosEnergy', color='blue')
-sns.scatterplot(data=dfData, x='ExpId', y='NegativeEnergy', ax=ax, label='NegEnergy', color='red')
-sns.scatterplot(data=dfData, x='ExpId', y='Energy', ax=ax, label='Energy', color='green')
 
-ax.set_xlabel('ExpId')
-ax.set_ylabel('Energy (J)')
-ax.legend()
 
-plt.xticks(rotation=45)  # Rotar las etiquetas del eje x para una mejor legibilidad
-plt.tight_layout()
-PDF.savefig(fig)
+    # Gráfica para Energia en función de T1 Y T2
+    # Obtener los nombres de los diferentes valores de ExpId
+    # Configurar el gráfico
+    fig, ax = plt.subplots(figsize=(10, 6))
+    fig.suptitle('Contact Time Effect')
+    # Trazar los puntos para PosEnergy, NegEnergy y Energy en función de ExpId
+    sns.scatterplot(data=dfData, x='ExpId', y='PositiveEnergy', ax=ax, label='PosEnergy', color='blue')
+    sns.scatterplot(data=dfData, x='ExpId', y='NegativeEnergy', ax=ax, label='NegEnergy', color='red')
+    sns.scatterplot(data=dfData, x='ExpId', y='Energy', ax=ax, label='Energy', color='green')
 
-# %% Plot experiment time traces
+    ax.set_xlabel('ExpId')
+    ax.set_ylabel('Energy (J)')
+    ax.legend()
 
-VarColors = {
-    'Voltage': {'LineKwarg': {'color': 'r',
-                              },
-                'Limits': (-180, 180),
-                'Label': 'Voltage [V]'
-                },
-    'Current': {'LineKwarg': {'color': 'b',
-                              },
-                'Limits': (-15, 15),
-                'Factor': 1e6,
-                'Label': 'Current [uA]'
-                },
-    'Position': {'LineKwarg': {'color': 'k',
-                               'linestyle': 'dashed',
-                               'linewidth': 0.5,
-                               },
-                 # 'Limits': (-5, 5),
-                 'Label': 'Position [mm]'
-                 },
-    'Force': {'LineKwarg': {'color': 'g',
-                            'linestyle': 'dashed',
-                            'linewidth': 0.5,
-                            },
-              # 'Limits': (-5, 5),
-              'Label': 'Force [N]'
-              },
-    'Acceleration': {'LineKwarg': {'color': 'orange',
+    plt.xticks(rotation=45)  # Rotar las etiquetas del eje x para una mejor legibilidad
+    plt.tight_layout()
+    PDF.savefig(fig)
+
+    # %% Plot experiment time traces
+
+    VarColors = {
+        'Voltage': {'LineKwarg': {'color': 'black',
+                    'linestyle': 'solid'
+                                  },
+                    'Limits': (-180, 180),
+                    'Label': 'Voltage [V]'
+                    },
+        'Current': {'LineKwarg': {'color': 'black',
+                    'linestyle': 'dashed'
+                                  },
+                    'Limits': (-15, 15),
+                    'Factor': 1e6,
+                    'Label': 'Current [uA]'
+                    },
+        'Position': {'LineKwarg': {'color': 'gray',
                                    'linestyle': 'dashed',
                                    'linewidth': 0.5,
                                    },
-                     'Limits': (-20, 20),
-                     'Label': 'Acceleration [m/s^2]'
+                     # 'Limits': (-5, 5),
+                     'Label': 'Position [mm]'
                      },
-    'Velocity': {'LineKwarg': {'color': 'brown',
-                               'linestyle': 'dashed',
-                               'linewidth': 0.5,
-                               },
-                 'Limits': (-0.3, 0.3),
-                 'Label': 'Velocity [m/s]'
-                 },
-    'Power': {'LineKwarg': {'color': 'purple',
-                            },
-              'Factor': 1e6,
-              'Limits': (0, 1000),
-              'Label': 'Power [uW]'},
-}
+        'Force': {'LineKwarg': {'color': 'g',
+                                'linestyle': 'dashed',
+                                'linewidth': 0.5,
+                                },
+                  # 'Limits': (-5, 5),
+                  'Label': 'Force [N]'
+                  },
+        'Acceleration': {'LineKwarg': {'color': 'orange',
+                                       'linestyle': 'dashed',
+                                       'linewidth': 0.5,
+                                       },
+                         'Limits': (-20, 20),
+                         'Label': 'Acceleration [m/s^2]'
+                         },
+        'Velocity': {'LineKwarg': {'color': 'brown',
+                                   'linestyle': 'dashed',
+                                   'linewidth': 0.5,
+                                   },
+                     'Limits': (-0.3, 0.3),
+                     'Label': 'Velocity [m/s]'
+                     },
+        'Power': {'LineKwarg': {'color': 'purple',
+                                },
+                  'Factor': 1e6,
+                  'Limits': (0, 1000),
+                  'Label': 'Power [uW]'},
+
+    }
 
 
-dSel = dfData
-#dSel = dfData.query("TribuId == 'SwTENG-RF2' ")
+    dSel = dfData
+    #dSel = dfData.query("TribuId == 'SwTENG-RF2' ")
 
-for ex, dExp in dSel.groupby('ExpId'):
-    fig, (axtime, axpos) = plt.subplots(2, 1, figsize=(11, 7))
-    for gn, df in dExp.groupby('RloadId'):
-        # plot time traces
-        AxsDict, _ = GenFigure(dfData=df.iloc[0].Data,
-                               xVar='Time',
-                               PlotColumns=VarColors,
-                               axisFactor=0.15,
-                               ax=axtime)
-        for index, r in df.iterrows():
-            Data = r.Data
-            for var, ax in AxsDict.items():
-                if 'Factor' in VarColors[var]:
-                    ptdata = Data[var] * VarColors[var]['Factor']
-                else:
-                    ptdata = Data[var]
-                ax.plot(Data['Time'], ptdata, **VarColors[var]['LineKwarg'])
-                ax.axvline(x=r.tTransition, color='y')
-            ax.set_xlabel('Time')
-
-        # plot position traces
-        AxsDict, _ = GenFigure(dfData=df.iloc[0].Data,
-                               xVar='Position',
-                               PlotColumns=VarColors,
-                               axisFactor=0.15,
-                               ax=axpos)
-        for index, r in df.iterrows():
-            Data = r.Data
-            for var, ax in AxsDict.items():
-                if 'Factor' in VarColors[var]:
-                    ptdata = Data[var] * VarColors[var]['Factor']
-                else:
-                    ptdata = Data[var]
-                ax.plot(Data['Position'], ptdata, **VarColors[var]['LineKwarg'])
-            ax.set_xlabel('Position')
-            ax.set_xlim(0, 2)
-
-        fig.suptitle(f'Experiment: {r.ExpId}, Tribu: {r.TribuId}, Rload: {r.RloadId}, Req: {r.Req}')
-        fig.tight_layout()
-        PDF.savefig(fig)
-        plt.close(fig)
-   # Guardar la figura como una imagen en la carpeta "images"
-   #      image_file = f'./images/Experiment_{ex}_Rload_{gn}.png'
-   #      fig.savefig(image_file)
-   #      image_files.append(image_file)
+    for ex, dExp in dSel.groupby('ExpId'):
+        fig, (axtime, axpos) = plt.subplots(2, 1, figsize=(11, 7))
+        for gn, df in dExp.groupby('RloadId'):
+            # plot time traces
+            AxsDict, _ = GenFigure(dfData=df.iloc[0].Data,
+                                   xVar='Time',
+                                   PlotColumns=VarColors,
+                                   axisFactor=0.15,
+                                   ax=axtime)
+            legend_elements = [] # modify
+            for index, r in df.iterrows():
+                Data = r.Data
+                for var, ax in AxsDict.items():
+                    if 'Factor' in VarColors[var]:
+                        ptdata = Data[var] * VarColors[var]['Factor']
+                    else:
+                        ptdata = Data[var]
+                    ax.plot(Data['Time'], ptdata, **VarColors[var]['LineKwarg'])
 
 
-# # Crear animación con las imágenes
-# animation_file = 'animation.gif'
-# with imageio.get_writer(animation_file, mode='I', fps=2) as writer:
-#     for image_file in image_files:
-#         image = imageio.imread(image_file)
-#         writer.append_data(image)
-#
-# print(f'Animation saved as {animation_file}')
-PDF.close()
+
+                    ax.axvline(x=r.tTransition, color='y')
+                ax.set_xlabel('Time')
+
+            line = axtime.plot([], [], label=VarColors[var]['Label'], **VarColors[var]['LineKwarg'])[0]  # modify
+            legend_elements.append(line)  # modify
+
+            axtime.legend()  # modify
 
 
-#%%
-fig, ax = plt.subplots()
-sns.stripplot(data=dfData,
-              x='Req',
-              y='Energy',
-              hue='TribuId',
-              ax=ax,
-              )
+            #
+            # # plot position traces
+            # AxsDict, _ = GenFigure(dfData=df.iloc[0].Data,
+            #                        xVar='Position',
+            #                        PlotColumns=VarColors,
+            #                        axisFactor=0.15,
+            #                        ax=axpos)
+            # for index, r in df.iterrows():
+            #     Data = r.Data
+            #     for var, ax in AxsDict.items():
+            #         if 'Factor' in VarColors[var]:
+            #             ptdata = Data[var] * VarColors[var]['Factor']
+            #         else:
+            #             ptdata = Data[var]
+            #         ax.plot(Data['Position'], ptdata, **VarColors[var]['LineKwarg'])
+            #     ax.set_xlabel('Position')
+            #     ax.set_xlim(0, 2)
+            #
 
-fig, ax = plt.subplots()
-sns.scatterplot(data=dfData,
+            fig.suptitle(f'Experiment: {r.ExpId}, Tribu: {r.TribuId}, Rload: {r.RloadId}, Req: {r.Req}')
+            fig.tight_layout()
+            PDF.savefig(fig)
+            plt.close(fig)
+
+
+
+        #Guardar la figura como una imagen en la carpeta "images"
+        # image_file = f'./images/Experiment_{ex}_Rload_{gn}.png'
+        # fig.savefig(image_file)
+        # image_files.append(image_file)
+
+
+
+
+    # # Crear animación con las imágenes
+    # animation_file = 'animation.gif'
+    # with imageio.get_writer(animation_file, mode='I', fps=2) as writer:
+    #     for image_file in image_files:
+    #         image = imageio.imread(image_file)
+    #         writer.append_data(image)
+    #
+    # print(f'Animation saved as {animation_file}')
+
+    PDF.close()
+
+
+    #%%
+    fig, ax = plt.subplots()
+    sns.stripplot(data=dfData,
                   x='Req',
                   y='Energy',
                   hue='TribuId',
                   ax=ax,
                   )
 
+    fig, ax = plt.subplots()
+    sns.scatterplot(data=dfData,
+                      x='Req',
+                      y='Energy',
+                      hue='TribuId',
+                      ax=ax,
+                      )
 
-fig, ax = plt.subplots()
-sns.boxplot(data=dfData,
-              x='TribuId',
-              y='Energy',
-              order=['SwTENG-R', 'SwTENG-RF2', 'SwTENG-RF3'],
-              #hue='Comments',
-              ax=ax,
-              )
+    fig, ax = plt.subplots()
+    sns.boxplot(data=dfData,
+                  x='TribuId',
+                  y='Energy',
+                  #order=['SwTENG-R', 'SwTENG-RF2', 'SwTENG-RF3'],
+                  #hue='Comments',
+                  ax=ax,
+                  )
