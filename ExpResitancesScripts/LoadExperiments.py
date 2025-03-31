@@ -129,7 +129,7 @@ for index, r in dfExps.iterrows():
     dfCycles = pd.concat([dfCycles, dfCycle])
 
     # Generate Debug Raw Figures
-    # Plotea en funcion de tiempo
+    # Plot Signal vs time
     XVar = 'Time'
     AxsDict, VarColors = GenFigure(dfData, xVar=XVar, axisFactor=0.1, figsize=(12, 5))
     for var, ax in AxsDict.items():
@@ -140,17 +140,17 @@ for index, r in dfExps.iterrows():
         ax.plot(dfData[XVar], ptdata, **VarColors[var]['LineKwarg']) # Plotea cada columna
 
     # Generates yellow separation lines to start, end of the cycles
-    for index, r in dfCycle.iterrows():
-        ax.axvline(x=r.tStart, color='y', linewidth=2)
-        ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=2)
-        ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=1)
+    # for index, r in dfCycle.iterrows():
+    #     ax.axvline(x=r.tStart, color='y', linewidth=2)
+    #     ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=2)
+    #     ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=1)
 
     fig = ax.get_figure()
     fig.suptitle(r.ExpId)
     fig.tight_layout()
     PDF.savefig(fig, bbox_inches='tight')
 
-    # Plotea en funcion de posicion
+    # Plot vs position
     XVar = 'Position'
     AxsDict, VarColors = GenFigure(dfData, xVar=XVar, figsize=(12, 5))
     for var, ax in AxsDict.items():

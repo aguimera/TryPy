@@ -110,13 +110,13 @@ VarColors = {
                 'Factor': 1e6,
                 'Label': 'Current [uA]'
                 },
-    'Position': {'LineKwarg': {'color': 'gray',
-                               'linestyle': 'dashed',
-                               'linewidth': 0.5,
-                               },
-                 # 'Limits': (-5, 5),
-                 'Label': 'Position [mm]'
-                 },
+    # 'Position': {'LineKwarg': {'color': 'gray',
+    #                            'linestyle': 'dashed',
+    #                            'linewidth': 0.5,
+    #                            },
+    #              # 'Limits': (-5, 5),
+    #              'Label': 'Position [mm]'
+    #              },
     # 'Force': {'LineKwarg': {'color': 'g',
     #                         'linestyle': 'dashed',
     #                         'linewidth': 0.5,
@@ -175,14 +175,14 @@ for ex, dExp in dSel.groupby('ExpId'):
 
                 #Plot the line that separates the positive/negative peaks
                 #ax.axvline(x=r.tTransition, color='y')
-                ax.set_xlabel('Time')
+                ax.set_xlabel('Time [s]')
 
         line = axtime.plot([], [], label=VarColors['Voltage']['Label'], **VarColors['Voltage']['LineKwarg'])[0]  # modify
         legend_elements.append(line)  # modify
         line = axtime.plot([], [], label=VarColors['Current']['Label'], **VarColors['Current']['LineKwarg'])[0]  # modify
         legend_elements.append(line)  # modify
-        line = axtime.plot([], [], label=VarColors['Position']['Label'], **VarColors['Position']['LineKwarg'])[0]  # modify
-        legend_elements.append(line)  # modify
+        # line = axtime.plot([], [], label=VarColors['Position']['Label'], **VarColors['Position']['LineKwarg'])[0]  # modify
+        # legend_elements.append(line)  # modify
 
         axtime.legend()  # modify
 
@@ -206,7 +206,8 @@ for ex, dExp in dSel.groupby('ExpId'):
         #     ax.set_xlim(0, 2)
         #
 
-        fig.suptitle(f'Experiment: {r.ExpId}, Tribu: {r.TribuId}, Rload: {r.RloadId}, Req: {r.Req}')
+        # fig.suptitle(f'Experiment: {r.ExpId}, Tribu: {r.TribuId}, Rload: {r.RloadId}, Req: {r.Req}')
+        fig.suptitle(f'Req: {r.Req / 1e6:.2f} MΩ') #pass it to Megas in the title
         fig.tight_layout()
         PDF.savefig(fig)
         plt.close(fig)
