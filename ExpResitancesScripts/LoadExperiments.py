@@ -22,7 +22,7 @@ plt.close('all')  #cerrar todas las graficas antes de empezar
 plt.ion()  #activar las graficas que se vean y que no se escondan
 
 # Main Root Data Folder
-DataFolder = "S:/Users/Maria/DataTENG/ExpResistance/"
+DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/03-04-2025-ExpResistancePI2525/"
 
 
 
@@ -42,13 +42,10 @@ OutFile = DataFolder + 'DataSets/Cycles-{}.pkl'.format(ExpDef.split('/')[-1].spl
 dfExp = pd.read_excel(ExpDef)
 
 # If needed implement some data selection here from the excel
-dfExps = dfExp.query("TribuId == 'SwTENG-R'")
+dfExps = dfExp.query("TribuId == 'PI2525Au-R'")
 
 # %% Load Loads file
 dfLoads = pd.read_excel(LoadsDef)
-
-# TODO implement it in the LoadsFile
-dfLoads.Req = dfLoads.Req * 1000  # Convert to ohms
 
 # %% Add Loads Fields. Mezcla dos excels en uno con datos de lo dos escogidos
 # TODO: update for capacitors
@@ -68,7 +65,6 @@ for index, r in dfExps.iterrows():
         print("Experiment {} Deleted".format(r.ExpId))
 
 # %% Change path to absolute and check if they exist
-
 for index, r in dfExps.iterrows():
     daqFile = os.path.join(DataDir, r.DaqFile)
     if os.path.isfile(daqFile):
@@ -146,7 +142,8 @@ for index, r in dfExps.iterrows():
     #     ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=1)
 
     fig = ax.get_figure()
-    fig.suptitle(r.ExpId)
+    # fig.suptitle(r.ExpId)
+    fig.suptitle(f'Req: {r.Req / 1e6:.2f} MΩ')
     fig.tight_layout()
     PDF.savefig(fig, bbox_inches='tight')
 
@@ -162,7 +159,8 @@ for index, r in dfExps.iterrows():
 
     ax.set_xlim(0, 3)
     fig = ax.get_figure()
-    fig.suptitle(r.ExpId)
+    # fig.suptitle(r.ExpId)
+    fig.suptitle(f'Req: {r.Req / 1e6:.2f} MΩ')
     fig.tight_layout()
     PDF.savefig(fig, bbox_inches='tight')
     plt.close('all')

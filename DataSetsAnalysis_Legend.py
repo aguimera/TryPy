@@ -11,7 +11,7 @@ from scipy.integrate import simpson
 from TryPy.PlotData import PlotScalarValues, GenFigure
 
 # %% Load data
-DataFolder = 'S:/Users/Maria/DataTENG/ExpResistance/'
+DataFolder = 'S:/TriboMedData/CharacterizationData/TENGData/03-04-2025-ExpResistancePI2525/'
 
 #Takes the kpl generated in LoadExperiments and process it
 FileIn = DataFolder + 'DataSets/Cycles-Experiments.pkl'
@@ -110,13 +110,13 @@ VarColors = {
                 'Factor': 1e6,
                 'Label': 'Current [uA]'
                 },
-    # 'Position': {'LineKwarg': {'color': 'gray',
-    #                            'linestyle': 'dashed',
-    #                            'linewidth': 0.5,
-    #                            },
-    #              # 'Limits': (-5, 5),
-    #              'Label': 'Position [mm]'
-    #              },
+    'Position': {'LineKwarg': {'color': 'gray',
+                               'linestyle': 'dashed',
+                               'linewidth': 0.5,
+                               },
+                 # 'Limits': (-5, 5),
+                 'Label': 'Position [mm]'
+                 },
     # 'Force': {'LineKwarg': {'color': 'g',
     #                         'linestyle': 'dashed',
     #                         'linewidth': 0.5,
@@ -181,8 +181,8 @@ for ex, dExp in dSel.groupby('ExpId'):
         legend_elements.append(line)  # modify
         line = axtime.plot([], [], label=VarColors['Current']['Label'], **VarColors['Current']['LineKwarg'])[0]  # modify
         legend_elements.append(line)  # modify
-        # line = axtime.plot([], [], label=VarColors['Position']['Label'], **VarColors['Position']['LineKwarg'])[0]  # modify
-        # legend_elements.append(line)  # modify
+        line = axtime.plot([], [], label=VarColors['Position']['Label'], **VarColors['Position']['LineKwarg'])[0]  # modify
+        legend_elements.append(line)  # modify
 
         axtime.legend()  # modify
 
