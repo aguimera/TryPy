@@ -22,8 +22,7 @@ plt.close('all')  #cerrar todas las graficas antes de empezar
 plt.ion()  #activar las graficas que se vean y que no se escondan
 
 # Main Root Data Folder
-DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/03-04-2025-ExpResistancePI2525/"
-
+DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/03-04-2025-ExpResistancePI2525/"
 
 
 #definimos entradas y salidas
@@ -136,14 +135,14 @@ for index, r in dfExps.iterrows():
         ax.plot(dfData[XVar], ptdata, **VarColors[var]['LineKwarg']) # Plotea cada columna
 
     # Generates yellow separation lines to start, end of the cycles
-    # for index, r in dfCycle.iterrows():
-    #     ax.axvline(x=r.tStart, color='y', linewidth=2)
-    #     ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=2)
-    #     ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=1)
+    for index, r in dfCycle.iterrows():
+        ax.axvline(x=r.tStart, color='y', linewidth=2)
+        ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=2)
+        ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=1)
 
     fig = ax.get_figure()
-    # fig.suptitle(r.ExpId)
-    fig.suptitle(f'Req: {r.Req / 1e6:.2f} MΩ')
+    fig.suptitle(r.ExpId)
+    fig.suptitle(f'Req: {r.Req / 1e6:.2f} MΩ, {r.TribuId}')
     fig.tight_layout()
     PDF.savefig(fig, bbox_inches='tight')
 

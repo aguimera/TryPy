@@ -4,7 +4,7 @@ from scipy.integrate import simpson
 import pandas as pd
 
 
-def ExtractCyclesByPos(dfData, ContactPosition=8, Latency=10e-3):
+def ExtractCyclesByPos(dfData, ContactPosition=5, Latency=10e-3):
 
     dt = dfData.Time[dfData['Position'] < ContactPosition].diff()
     StartIds = np.where(dt > Latency)[0]
@@ -63,7 +63,7 @@ def FindTransitionTime(dfCycles, CurrentTh=None):
     return dfCycles
 
 
-def ExtractCycles(dfData, ContactPosition=8, ContactForce=None, Latency=10e-3, CurrentTh=None):
+def ExtractCycles(dfData, ContactPosition=5, ContactForce=None, Latency=10e-3, CurrentTh=None):
     """
     Extracts cycles from the given dataframe based on the specified ContactPosition or ContactForce.
     Calculates various parameters for each cycle and returns a list of dictionaries containing the cycle data.

@@ -11,7 +11,7 @@ from scipy.integrate import simpson
 from TryPy.PlotData import PlotScalarValues, GenFigure
 
 # %% Load data
-DataFolder = 'S:/TriboMedData/CharacterizationData/TENGData/03-04-2025-ExpResistancePI2525/'
+DataFolder = 'S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/03-04-2025-ExpResistancePI2525/'
 
 #Takes the kpl generated in LoadExperiments and process it
 FileIn = DataFolder + 'DataSets/Cycles-Experiments.pkl'
@@ -47,7 +47,7 @@ fig, axs = PlotScalarValues(dfData=dfData,
 
 
 # %% compare positive and negative peaks
-dSel = dfData.query("TribuId == 'SwTENG-R' ")
+dSel = dfData.query("TribuId == 'PI2525Au-R' ")
 fig, ax = plt.subplots()
 sns.lineplot(data=dSel,
              x='Req',
@@ -100,7 +100,7 @@ VarColors = {
     'Voltage': {'LineKwarg': {'color': 'black',
                 'linestyle': 'solid'
                               },
-                'Limits': (-180, 180),
+                'Limits': (-10, 10),
                 'Label': 'Voltage [V]'
                 },
     'Current': {'LineKwarg': {'color': 'black',
