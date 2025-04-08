@@ -12,47 +12,47 @@ VarColors = {
                 #'Limits': (-180, 180),
                 'Label': 'Voltage [V]'
                 },
-    # 'Current': {'LineKwarg': {'color': 'k', 'linewidth': 0.1
-    #                           },
-    #             # 'Limits': (-15, 15),
-    #             'Factor': 1e6,
-    #             'Label': 'Current [uA]'
-    #             },
+    'Current': {'LineKwarg': {'color': 'k', 'linewidth': 0.1
+                              },
+                # 'Limits': (-15, 15),
+                'Factor': 1e6,
+                'Label': 'Current [uA]'
+                },
 
-    # 'Position': {'LineKwarg': {'color': 'k',
-    #                           'linestyle': 'dashed',
-    #                            'linewidth': 0.5,
-    #                            },
-    #              # 'Limits': (-5, 5),
-    #              'Label': 'Position [mm]'
-    #              },
-    #
-    # 'Force': {'LineKwarg': {'color': 'g',
-    #                         'linestyle': 'dashed',
-    #                         'linewidth': 0.5,
-    #                        },
-    #           # 'Limits': (-5, 5),
-    #          'Label': 'Force [N]'
-    #           },
-    # 'Acceleration': {'LineKwarg': {'color': 'orange',
-    #                                'linestyle': 'dashed',
-    #                               'linewidth': 0.5,
-    #                               },
-    #                 # 'Limits': (-20, 20),
-    #                 'Label': 'Acceleration [m/s^2]'
-    #                 },
-    # 'Velocity': {'LineKwarg': {'color': 'brown',
-    #                           'linestyle': 'dashed',
-    #                           'linewidth': 0.5,
-    #                          },
-    #            # 'Limits': (-0.3, 0.3),
-    #             'Label': 'Velocity [m/s]'
-    #             },
-    # 'Power': {'LineKwarg': {'color': 'purple',
-    #                        },
-    #          'Factor': 1e6,
-    #          # 'Limits': (0, 1000),
-    #          'Label': 'Power [uW]'},
+    'Position': {'LineKwarg': {'color': 'k',
+                              'linestyle': 'dashed',
+                               'linewidth': 0.5,
+                               },
+                 # 'Limits': (-5, 5),
+                 'Label': 'Position [mm]'
+                 },
+
+    'Force': {'LineKwarg': {'color': 'g',
+                            'linestyle': 'dashed',
+                            'linewidth': 0.5,
+                           },
+              # 'Limits': (-5, 5),
+             'Label': 'Force [N]'
+              },
+    'Acceleration': {'LineKwarg': {'color': 'orange',
+                                   'linestyle': 'dashed',
+                                  'linewidth': 0.5,
+                                  },
+                    # 'Limits': (-20, 20),
+                    'Label': 'Acceleration [m/s^2]'
+                    },
+    'Velocity': {'LineKwarg': {'color': 'brown',
+                              'linestyle': 'dashed',
+                              'linewidth': 0.5,
+                             },
+               # 'Limits': (-0.3, 0.3),
+                'Label': 'Velocity [m/s]'
+                },
+    'Power': {'LineKwarg': {'color': 'purple',
+                           },
+             'Factor': 1e6,
+             # 'Limits': (0, 1000),
+             'Label': 'Power [uW]'},
 
 
 }

@@ -4,8 +4,10 @@ from scipy.integrate import simpson
 import pandas as pd
 
 
-def ExtractCyclesByPos(dfData, ContactPosition=5, Latency=10e-3):
+def ExtractCyclesByPos(dfData, ContactPosition=3, Latency=10e-3):
 
+    # Entre los puntos de un ciclo hay poco tiempo, pero entre un punto de final de ciclo y comienzo del siguiente hay
+    # mucho tiempo, con esto se puede detectar el ciclo.
     dt = dfData.Time[dfData['Position'] < ContactPosition].diff()
     StartIds = np.where(dt > Latency)[0]
     StartIds = np.hstack((0, StartIds))

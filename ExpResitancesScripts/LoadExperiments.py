@@ -22,8 +22,8 @@ plt.close('all')  #cerrar todas las graficas antes de empezar
 plt.ion()  #activar las graficas que se vean y que no se escondan
 
 # Main Root Data Folder
-DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/03-04-2025-ExpResistancePI2525/"
-
+DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/04-04-2025-ExpResistancePI2611/"
+TribuId = "'PI2611Au-R'"
 
 #definimos entradas y salidas
 DataDir = DataFolder + 'RawData/'
@@ -41,7 +41,7 @@ OutFile = DataFolder + 'DataSets/Cycles-{}.pkl'.format(ExpDef.split('/')[-1].spl
 dfExp = pd.read_excel(ExpDef)
 
 # If needed implement some data selection here from the excel
-dfExps = dfExp.query("TribuId == 'PI2525Au-R'")
+dfExps = dfExp.query("TribuId == " + TribuId)
 
 # %% Load Loads file
 dfLoads = pd.read_excel(LoadsDef)
