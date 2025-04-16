@@ -21,15 +21,15 @@ mpl.use("QtAgg")  #backend es la herramienta de visor de graficas
 plt.close('all')  #cerrar todas las graficas antes de empezar
 plt.ion()  #activar las graficas que se vean y que no se escondan
 
-# Main Root Data Folder
-DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/04-04-2025-ExpResistancePI2611/"
-TribuId = "'PI2611Au-R'"
+# Main Root Data Folder path . Use /, not \
+DataFolder = "S:/Users/Maria/DataTENG/OldGITHUB/ExpElectrodes/"
+TribuId = "'SwTENG'"
 
 #definimos entradas y salidas
 DataDir = DataFolder + 'RawData/'
-LoadsDef = DataFolder + 'RawData/LoadsDescription.ods'
+LoadsDef = DataFolder + 'RawData/LoadsDescription.xlsx'
 #WRITE HERE THE EXCEL NAME OF THE EXPERIMENT TO SELECT  DATA TO PROCESS
-ExpDef = DataFolder + 'RawData/Experiments.ods'
+ExpDef = DataFolder + 'RawData/ExperimentsrGO1405.ods'
 
 
 # Output Files definition rename if needed
@@ -136,13 +136,13 @@ for index, r in dfExps.iterrows():
 
     # Generates yellow separation lines to start, end of the cycles
     for index, r in dfCycle.iterrows():
-        ax.axvline(x=r.tStart, color='y', linewidth=2)
-        ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=2)
+        ax.axvline(x=r.tStart, color='y', linewidth=1)
+        ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=1)
         ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=1)
 
     fig = ax.get_figure()
     fig.suptitle(r.ExpId)
-    fig.suptitle(f'Req: {r.Req / 1e6:.2f} MΩ, {r.TribuId}')
+    fig.suptitle(f'Req: {r.Req / 1e6:.2f} MΩ, {r.ExpId}')
     fig.tight_layout()
     PDF.savefig(fig, bbox_inches='tight')
 

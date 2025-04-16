@@ -9,6 +9,7 @@ MotColumnRenames = {
     'MC SW Overview - Actual Position(mm)': 'Position',
     'MC SW Force Control - Measured Force(N)': 'Force',
     'MC SW Overview - Actual Velocity(m/s)': 'Velocity',
+    'MC SW Force Control - Actual Acceleration(m/s^2)': 'Acceleration',
 }
 
 DQAColumnRenames = {
@@ -59,20 +60,31 @@ def LoadDAQFile(DaqFile):
         dfDAQ = tdms_file.as_dataframe(time_index=True,
                                        scaled_data=False)
         dfDAQ.reset_index(inplace=True)
+        # dfDAQ = dfDAQ.iloc[:, :2]
         dfDAQ = dfDAQ.set_axis(['Time', 'Voltage'], axis=1)
         return dfDAQ
     elif DaqFile.endswith('.xlsx'):
         daqf = pd.ExcelFile(DaqFile)
         sheets = daqf.sheet_names
-        dfDAQ = pd.read_excel(DaqFile,
-                              sheet_name=sheets[1])
-        # rename columns
-        dfDAQ = dfDAQ.rename(columns=DQAColumnRenames)
-        return dfDAQ
-    else:
-        print(f'File {DaqFile} not recognized')
-        return None
 
+        # Check if there's more than one sheet
+        if len(sheets) > 1:
+            sheet_to_use = sheets[1]
+        else:
+            print(f"⚠️ Only one sheet found in '{DaqFile}'. Using the first one.")
+            sheet_to_use = sheets[0]
+
+        dfDAQ = pd.read_excel(DaqFile, sheet_name=sheet_to_use)
+
+        # Optionally rename columns if DQAColumnRenames is defined
+        if 'DQAColumnRenames' in globals():
+            dfDAQ = dfDAQ.rename(columns=DQAColumnRenames)
+
+        return dfDAQ
+
+    else:
+        print(f'❌ File {DaqFile} not recognized')
+        return None
 
 def Loadfiles(ExpDef):
     """

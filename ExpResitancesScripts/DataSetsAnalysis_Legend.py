@@ -11,11 +11,11 @@ from scipy.integrate import simpson
 from TryPy.PlotData import PlotScalarValues, GenFigure
 
 # %% Load data
-DataFolder = 'S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/04-04-2025-ExpResistancePI2611/'
-TribuId = "'PI2611Au-R'"
+DataFolder = 'S:/Users/Maria/DataTENG/OldGITHUB/ExpElectrodes/'
+TribuId = "'Rgo'"
 
 #Takes the kpl generated in LoadExperiments and process it
-FileIn = DataFolder + 'DataSets/Cycles-Experiments.pkl'
+FileIn = DataFolder + 'DataSets/Cycles-ExperimentsrGONoRload.pkl'
 dfData = pd.read_pickle(FileIn)
 
 #Generate new pdf report called DataSetsAnalysis
@@ -72,6 +72,9 @@ sns.lineplot(data=dSel,
 # ax.set_yscale('log')
 ax.set_xlabel('Load Resistance (Ohm)')
 ax.set_ylabel('Energy (J)')
+fig.suptitle(r.TribuId)
+fig = ax.get_figure()
+# fig.suptitle(f'Req: {r.Req / 1e6:.2f} MΩ, {r.TribuId}')
 ax.legend()
 PDF.savefig(fig)
 
@@ -81,27 +84,27 @@ PDF.savefig(fig)
 # Obtener los nombres de los diferentes valores de ExpId
 # Configurar el gráfico
 fig, ax = plt.subplots(figsize=(10, 6))
-fig.suptitle('Contact Time Effect')
-# Trazar los puntos para PosEnergy, NegEnergy y Energy en función de ExpId
-sns.scatterplot(data=dfData, x='ExpId', y='PositiveEnergy', ax=ax, label='PosEnergy', color='blue')
-sns.scatterplot(data=dfData, x='ExpId', y='NegativeEnergy', ax=ax, label='NegEnergy', color='red')
-sns.scatterplot(data=dfData, x='ExpId', y='Energy', ax=ax, label='Energy', color='green')
+fig.suptitle('Signal Variability')
+# Trazar los puntos para PosEnergy, NegEnergy y Energy en función de Req
+sns.scatterplot(data=dfData, x='Req', y='PositiveEnergy', ax=ax, label='PosEnergy', color='blue')
+sns.scatterplot(data=dfData, x='Req', y='NegativeEnergy', ax=ax, label='NegEnergy', color='red')
+sns.scatterplot(data=dfData, x='Req', y='Energy', ax=ax, label='Energy', color='green')
 
-ax.set_xlabel('ExpId')
+ax.set_xlabel('Rload')
 ax.set_ylabel('Energy (J)')
+fig = ax.get_figure()
 ax.legend()
-
-plt.xticks(rotation=45)  # Rotar las etiquetas del eje x para una mejor legibilidad
+# plt.xticks(rotation=45)  # Rotar las etiquetas del eje x para una mejor legibilidad
 plt.tight_layout()
 PDF.savefig(fig)
 
 # %% Plot experiment time traces
 
 VarColors = {
-    'Voltage': {'LineKwarg': {'color': 'black',
+    'Voltage': {'LineKwarg': {'color': 'red',
                 'linestyle': 'solid'
                               },
-                'Limits': (-10, 10),
+                'Limits': (-0.3, 0.3),
                 'Label': 'Voltage [V]'
                 },
     'Current': {'LineKwarg': {'color': 'black',
