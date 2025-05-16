@@ -6,13 +6,10 @@ import os
 import matplotlib.pyplot as plt  #importa la libreria de graficas
 import matplotlib as mpl
 from matplotlib.backends.backend_pdf import PdfPages  #importar libreria para hacer pdfs
-
 #Archivos que seran Exportable. Importo las librerias que anton ha creado para el proyecto.
 from TryPy.Calculations import ExtractCyclesByPos, FindTransitionTime
 from TryPy.LoadData import Loadfiles
 from TryPy.PlotData import GenFigure
-
-# Analisis Estadistico con pandas. boxplots etc.
 import seaborn as sns
 
 mpl.use("QtAgg")  #backend es la herramienta de visor de graficas
@@ -33,18 +30,19 @@ TribuId = "'PI2525Au-Sampling'" #TribuID selection from excel name
 PDF = PdfPages(DataFolder + 'Reports/LoadReport-{}.pdf'.format(ExpDef.split('/')[-1].split('.')[0]))
 OutFile = DataFolder + 'DataSets/Cycles-{}.pkl'.format(ExpDef.split('/')[-1].split('.')[0])
 
-# %% Read Experiments files
+# %% Read Experiments Excel
 dfExp = pd.read_excel(ExpDef)
 dfExps = dfExp.query("TribuId == " + TribuId)
 
-# %% Read Loads fles
+# %% Read Loads excel
 dfLoads = pd.read_excel(LoadsDef)
+#Check if Req and Gain column exists
 LoadsFields = ('Req', 'Gain')  # List of fields from LoadsDef to add
 for lf in LoadsFields:
     if lf not in dfExps.columns:
         dfExps.insert(1, lf, None)
 # Check if load exists
-for index, r in dfExps.iterrows():
+for index, r in dfExps.iterrows(): #Para cada fila
     if r.RloadId in dfLoads.RloadId.values:
         for lf in LoadsFields:
             dfExps.loc[index, lf] = dfLoads.loc[dfLoads.RloadId == r.RloadId, lf].values
@@ -55,17 +53,17 @@ for index, r in dfExps.iterrows():
 
 # %% Change path to absolute and check if data files exist
 for index, r in dfExps.iterrows():
-#Check DAQ INFO
-    daqFile = os.path.join(DataDir, r.DaqFile)
-    if os.path.isfile(daqFile):
+#Check DAQ path
+    daqFile = os.path.join(DataDir, r.DaqFile) #Complete Path of the DAQ file
+    if os.path.isfile(daqFile): #If exists, updates DaqFile column with the complete path to the DAQ file
         dfExps.loc[index, 'DaqFile'] = daqFile
     else:
         print(f'File {daqFile} not found')
         dfExps.drop(index, inplace=True)
         print("Experiment {} Deleted".format(r.ExpId))
-#Check Motor INFO
-    motorFile = os.path.join(DataDir, r.MotorFile)
-    if os.path.isfile(motorFile):
+#Check Motor path
+    motorFile = os.path.join(DataDir, r.MotorFile) #Complete Path of the Motor file
+    if os.path.isfile(motorFile): #If exists, updates motorFile column with the complete path to the motor file
         dfExps.loc[index, 'MotorFile'] = motorFile
     else:
         print(f'File {motorFile} not found')
@@ -74,18 +72,16 @@ for index, r in dfExps.iterrows():
 
 # %% DATA PROCESSING
 plt.ioff()
-dfCycles = pd.DataFrame()
-for index, r in dfExps.iterrows():
+dfCycles = pd.DataFrame() #Inicialización
+for index, r in dfExps.iterrows(): #Para cada fila del último dfExps
     print(f'Processing: {r.ExpId}')
 
-    # Load data files
+ # Creates DataFrame with DAQ(V,I,P) and Motor(Position, Force, etc) Data
     dfData = Loadfiles(r)
-
-    # Reference position and force
-    dfData.Position = dfData.Position - dfData.Position.min()
+# Reference position and force
+    dfData.Position = dfData.Position - dfData.Position.min() #Offset so position starts at 0
     dfData.Force = -dfData.Force
-
-    # Extract Cycles
+# Extract Cycles
     CyclesList = ExtractCyclesByPos(dfData,
                                     ContactPosition=r.ContactPosition,
                                     Latency=r.Latency,
@@ -99,7 +95,7 @@ for index, r in dfExps.iterrows():
     # Find Transition Time
     dfCycle = FindTransitionTime(dfCycle)
 
-    # Extract analytical information per cycle
+    # Extract analytical information PER CYCLE
     for index, r in dfCycle.iterrows():
         cyData = r.Data
         imax = cyData.Current.idxmax()
@@ -108,8 +104,8 @@ for index, r in dfExps.iterrows():
         dfCycle.loc[index, 'CurrentMin'] = cyData.Current[imin] #Negative peak
         dfCycle.loc[index, 'CurrentMaxPosition'] = cyData.Position[imax] #Positive peak position
         dfCycle.loc[index, 'CurrentMinPosition'] = cyData.Position[imin] #Negative peak position
-        dfCycle.loc[index, 'PosPulseWidth'] = cyData.Current #Positive peak width (s)
-        dfCycle.loc[index, 'NegPulseWidth'] = cyData.Current #Negative peak width (s)
+        # dfCycle.loc[index, 'PosPulseWidth'] = cyData.Current #Positive peak width (s)
+        # dfCycle.loc[index, 'NegPulseWidth'] = cyData.Current #Negative peak width (s)
 
     # Stack Cycles for all experiments
     dfCycles = pd.concat([dfCycles, dfCycle])

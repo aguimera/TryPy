@@ -24,10 +24,11 @@ FindCyclesBy = 'Position'
 # %% Load Experiment Info
 dfExps = pd.read_excel(ExpDef)
 dfLoads = pd.read_excel(LoadsDef)
-dfLoads.Req = dfLoads.Req * 1000
+
 
 # %% Add Loads Fields
 LoadsFields = ('Req', 'Gain')
+dfLoads.Req = dfLoads.Req * 1000
 for lf in LoadsFields:
     dfExps.insert(1, lf, None)
 
