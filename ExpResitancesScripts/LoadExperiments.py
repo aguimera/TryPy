@@ -114,8 +114,9 @@ for index, r in dfExps.iterrows():
     # Stack Cycles for all experiments
     dfCycles = pd.concat([dfCycles, dfCycle])
 
-    # Generate Debug Raw Figures
-    # Plot Signal vs time
+# %% DATA PLOTTING
+
+    #Plot Signal vs Time
     XVar = 'Time'
     AxsDict, VarColors = GenFigure(dfData, xVar=XVar, axisFactor=0.1, figsize=(12, 5))
     for var, ax in AxsDict.items():
@@ -125,8 +126,7 @@ for index, r in dfExps.iterrows():
             ptdata = dfData[var]
         ax.plot(dfData[XVar], ptdata, **VarColors[var]['LineKwarg']) # Plotea cada columna
 
-    # Generates yellow separation lines to start, end of the cycles
-    for index, r in dfCycle.iterrows():
+    for index, r in dfCycle.iterrows():    # Generates yellow separation lines to start, end of the cycles
         ax.axvline(x=r.tStart, color='y', linewidth=1)
         ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=1)
         ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=1)
@@ -137,7 +137,7 @@ for index, r in dfExps.iterrows():
     fig.tight_layout()
     PDF.savefig(fig, bbox_inches='tight')
 
-    # Plot vs position
+    # Plot Signal vs Position
     XVar = 'Position'
     AxsDict, VarColors = GenFigure(dfData, xVar=XVar, figsize=(12, 5))
     for var, ax in AxsDict.items():
