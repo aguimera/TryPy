@@ -19,17 +19,15 @@ mpl.use("QtAgg")  #backend es la herramienta de visor de graficas
 plt.close('all')  #cerrar todas las graficas antes de empezar
 plt.ion()  #activar las graficas que se vean y que no se escondan
 
+# %% Definition of folders path and files names to use
+
 # Main Root Data Folder path . Use /, not \
 DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/03-04-2025-ExpResistancePI2525/"
-TribuId = "'PI2525Au-T1T2'"
-
 #definimos entradas y salidas
 DataDir = DataFolder + 'RawData/'
-LoadsDef = DataFolder + 'RawData/LoadsDescription.ods'
-#WRITE HERE THE EXCEL NAME OF THE EXPERIMENT TO SELECT  DATA TO PROCESS
-ExpDef = DataFolder + 'RawData/Experiments.ods'
-
-
+LoadsDef = DataFolder + 'RawData/LoadsDescription.ods' #Loads excel to use
+ExpDef = DataFolder + 'RawData/Experiments.ods' #Excel name to use
+TribuId = "'PI2525Au-T1T2'" #TribuID selection from excel name
 # Output Files definition rename if needed
 # Creates a PDF in Reports folder with the name LoadReports-ExpDef(previously specified)
 PDF = PdfPages(DataFolder + 'Reports/LoadReport-{}.pdf'.format(ExpDef.split('/')[-1].split('.')[0]))
