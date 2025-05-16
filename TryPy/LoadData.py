@@ -1,13 +1,14 @@
 import os
-
 import numpy as np
 import pandas as pd
 from nptdms import TdmsFile
 
+# %% Rename Raw Data columns
 MotColumnRenames = {
     'Time(s)': 'Time',
     'MC SW Overview - Actual Position(mm)': 'Position',
     'MC SW Force Control - Measured Force(N)': 'Force',
+    'MC SW Force Control - Target Force(N)': 'TargetForce',
     'MC SW Overview - Actual Velocity(m/s)': 'Velocity',
     'MC SW Force Control - Actual Acceleration(m/s^2)': 'Acceleration',
 }
@@ -17,12 +18,13 @@ DQAColumnRenames = {
     'Unnamed: 1': 'Time',
 }
 
-
+#%% Load Motor Raw Data
 def LoadMotorFile(MotorFile):
     """
     LoadMotorFile reads a CSV file and processes it to remove non-defined columns and rename columns.
     It takes a single parameter MotorFile, which is the path to the CSV file.
-    It returns a pandas DataFrame dfMOT.
+    Return:
+    - dfMOT data frame
     """
     dfMOT = pd.read_csv(MotorFile,
                         header=0,
@@ -45,7 +47,7 @@ def LoadMotorFile(MotorFile):
         dfMOT['Acceleration'] = dfMOT.Velocity.diff() / dfMOT.Time.diff()
     return dfMOT
 
-
+#%% Load DAQ Raw Data
 def LoadDAQFile(DaqFile):
     """
     A function to load a DAQ file and return a DataFrame based on the file type.
@@ -79,25 +81,21 @@ def LoadDAQFile(DaqFile):
         # Optionally rename columns if DQAColumnRenames is defined
         if 'DQAColumnRenames' in globals():
             dfDAQ = dfDAQ.rename(columns=DQAColumnRenames)
-
         return dfDAQ
 
     else:
         print(f'❌ File {DaqFile} not recognized')
         return None
 
+#%%  Loads data files, calculates sampling rates, interpolates data, and calculates voltage, current, and power.
 def Loadfiles(ExpDef):
     """
-    Loads data files, calculates sampling rates, interpolates data, and calculates voltage, current, and power.
-
     Parameters:
     - ExpDef: Experiment definition containing file paths, gain, and resistance values.
-
     Returns:
     - dfData: DataFrame containing loaded and processed data.
     """
     r = ExpDef
-
     if not os.path.isfile(r.DaqFile):
         print(f'File {r.DaqFile} not found')
         return None
@@ -112,33 +110,44 @@ def Loadfiles(ExpDef):
     dfMOT = LoadMotorFile(r.MotorFile)
 
     # Motor sampling Rate
+    nSampsMotor = dfMOT.Time.size
     MotFs = 1 / dfMOT.Time.diff().mean()
     print(f'Motor sampling rate: {MotFs}')
 
     # DAQ sampling rate
     if 'Time' in dfDAQ.columns:
+        nSampsDAQ = dfDAQ.Voltage.size
         DaqFs = 1 / dfDAQ.Time.diff().mean()
         print(f'Found DAQ sampling rate: {DaqFs}')
     else:
-        nSamps = dfDAQ.Voltage.size
-        DaqFs = nSamps / (1 / MotFs * dfMOT.Time.size)
+        nSampsDAQ = dfDAQ.Voltage.size
+        DaqFs = nSampsDAQ / (1 / MotFs * nSampsMotor)
         print(f'Calculated DAQ sampling rate: {DaqFs}')
-        dfDAQ['Time'] = np.arange(0, nSamps) / DaqFs
+        dfDAQ['Time'] = np.arange(0, nSampsDAQ) / DaqFs
 
-    # Create interpolated data
-    dfData = dfDAQ
-    for col in dfMOT.columns:
-        if col == 'Time':
-            continue
-        dfData[col] = np.interp(dfData.Time, dfMOT.Time, dfMOT[col])
+    if nSampsDAQ>nSampsMotor:
+        # Interpolate Motor Data
+        dfData = dfDAQ
+        for col in dfMOT.columns:
+            if col == 'Time':
+                continue
+            dfData[col] = np.interp(dfData.Time, dfMOT.Time, dfMOT[col])
 
-    #FILTRO SEÑAL
+    elif nSampsDAQ<nSampsMotor:
+        # Interpolate DAQ Data
+        dfData = dfMOT
+        for col in dfDAQ.columns:
+            if col == 'Time':
+                continue
+            dfData[col] = np.interp(dfData.Time, dfDAQ.Time, dfDAQ[col])
+
+    #%% Signal Filtering
     # TODO parametrize this
     window_size = 9  # Tamaño de la ventana del filtro
-    #  dfData['SmoothVoltages'] = dfData['Voltage'].rolling(window=window_size).median()
+    # dfData['SmoothVoltages'] = dfData['Voltage'].rolling(window=window_size).median()
     dfData['SmoothVoltage'] = dfData['Voltage'].rolling(window=window_size).mean()
 
-    # Calculate Voltage, Current and Power
+    #%% Calculate Voltage, Current and Power
     dfData['VoltageAcq'] = dfData.Voltage
     dfData['Voltage'] = dfData['SmoothVoltage'] / r.Gain
     dfData['Current'] = dfData.Voltage / r.Req

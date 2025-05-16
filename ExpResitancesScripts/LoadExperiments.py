@@ -6,55 +6,43 @@ import os
 import matplotlib.pyplot as plt  #importa la libreria de graficas
 import matplotlib as mpl
 from matplotlib.backends.backend_pdf import PdfPages  #importar libreria para hacer pdfs
-
 #Archivos que seran Exportable. Importo las librerias que anton ha creado para el proyecto.
 from TryPy.Calculations import ExtractCyclesByPos, FindTransitionTime
 from TryPy.LoadData import Loadfiles
 from TryPy.PlotData import GenFigure
-
-# Analisis Estadistico con pandas. boxplots etc.
 import seaborn as sns
-
-
 
 mpl.use("QtAgg")  #backend es la herramienta de visor de graficas
 plt.close('all')  #cerrar todas las graficas antes de empezar
 plt.ion()  #activar las graficas que se vean y que no se escondan
 
-# Main Root Data Folder path . Use /, not \
-DataFolder = "S:/Users/Maria/DataTENG/OldGITHUB/ExpElectrodes/"
-TribuId = "'SwTENG'"
+# %% Definition of folders path and files names to use
 
-#definimos entradas y salidas
+#Inputs definitions
+DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/03-04-2025-ExpResistancePI2525/" #Use /, not \
 DataDir = DataFolder + 'RawData/'
-LoadsDef = DataFolder + 'RawData/LoadsDescription.xlsx'
-#WRITE HERE THE EXCEL NAME OF THE EXPERIMENT TO SELECT  DATA TO PROCESS
-ExpDef = DataFolder + 'RawData/ExperimentsrGO1405.ods'
+LoadsDef = DataFolder + 'RawData/LoadsDescription.ods' #Loads excel to use
+ExpDef = DataFolder + 'RawData/Experiments.ods' #Excel name to use
+TribuId = "'PI2525Au-Sampling'" #TribuID selection from excel name
 
-
-# Output Files definition rename if needed
+# Output Definitions
 # Creates a PDF in Reports folder with the name LoadReports-ExpDef(previously specified)
 PDF = PdfPages(DataFolder + 'Reports/LoadReport-{}.pdf'.format(ExpDef.split('/')[-1].split('.')[0]))
 OutFile = DataFolder + 'DataSets/Cycles-{}.pkl'.format(ExpDef.split('/')[-1].split('.')[0])
 
-# %% Load Experiments file
+# %% Read Experiments Excel
 dfExp = pd.read_excel(ExpDef)
-
-# If needed implement some data selection here from the excel
 dfExps = dfExp.query("TribuId == " + TribuId)
 
-# %% Load Loads file
+# %% Read Loads excel
 dfLoads = pd.read_excel(LoadsDef)
-
-# %% Add Loads Fields. Mezcla dos excels en uno con datos de lo dos escogidos
-# TODO: update for capacitors
+#Check if Req and Gain column exists
 LoadsFields = ('Req', 'Gain')  # List of fields from LoadsDef to add
 for lf in LoadsFields:
     if lf not in dfExps.columns:
         dfExps.insert(1, lf, None)
-
 # Check if load exists
-for index, r in dfExps.iterrows():
+for index, r in dfExps.iterrows(): #Para cada fila
     if r.RloadId in dfLoads.RloadId.values:
         for lf in LoadsFields:
             dfExps.loc[index, lf] = dfLoads.loc[dfLoads.RloadId == r.RloadId, lf].values
@@ -63,39 +51,37 @@ for index, r in dfExps.iterrows():
         dfExps.drop(index, inplace=True)
         print("Experiment {} Deleted".format(r.ExpId))
 
-# %% Change path to absolute and check if they exist
+# %% Change path to absolute and check if data files exist
 for index, r in dfExps.iterrows():
-    daqFile = os.path.join(DataDir, r.DaqFile)
-    if os.path.isfile(daqFile):
+#Check DAQ path
+    daqFile = os.path.join(DataDir, r.DaqFile) #Complete Path of the DAQ file
+    if os.path.isfile(daqFile): #If exists, updates DaqFile column with the complete path to the DAQ file
         dfExps.loc[index, 'DaqFile'] = daqFile
     else:
         print(f'File {daqFile} not found')
         dfExps.drop(index, inplace=True)
         print("Experiment {} Deleted".format(r.ExpId))
-
-    motorFile = os.path.join(DataDir, r.MotorFile)
-    if os.path.isfile(motorFile):
+#Check Motor path
+    motorFile = os.path.join(DataDir, r.MotorFile) #Complete Path of the Motor file
+    if os.path.isfile(motorFile): #If exists, updates motorFile column with the complete path to the motor file
         dfExps.loc[index, 'MotorFile'] = motorFile
     else:
         print(f'File {motorFile} not found')
         dfExps.drop(index, inplace=True)
         print("Experiment {} Deleted".format(r.ExpId))
 
-# %% load data files
-
+# %% DATA PROCESSING
 plt.ioff()
-dfCycles = pd.DataFrame()
-for index, r in dfExps.iterrows():
+dfCycles = pd.DataFrame() #Inicialización
+for index, r in dfExps.iterrows(): #Para cada fila del último dfExps
     print(f'Processing: {r.ExpId}')
 
-    # Load data files
+ # Creates DataFrame with DAQ(V,I,P) and Motor(Position, Force, etc) Data
     dfData = Loadfiles(r)
-
-    # Reference position and force
-    dfData.Position = dfData.Position - dfData.Position.min()
+# Reference position and force
+    dfData.Position = dfData.Position - dfData.Position.min() #Offset so position starts at 0
     dfData.Force = -dfData.Force
-
-    # Extract Cycles
+# Extract Cycles
     CyclesList = ExtractCyclesByPos(dfData,
                                     ContactPosition=r.ContactPosition,
                                     Latency=r.Latency,
@@ -109,22 +95,24 @@ for index, r in dfExps.iterrows():
     # Find Transition Time
     dfCycle = FindTransitionTime(dfCycle)
 
-    # Add more calculations here Example
+    # Extract analytical information PER CYCLE
     for index, r in dfCycle.iterrows():
         cyData = r.Data
         imax = cyData.Current.idxmax()
         imin = cyData.Current.idxmin()
-        dfCycle.loc[index, 'CurrentMax'] = cyData.Current[imax]
-        dfCycle.loc[index, 'CurrentMin'] = cyData.Current[imin]
-        dfCycle.loc[index, 'CurrentMaxPosition'] = cyData.Position[imax]
-        dfCycle.loc[index, 'CurrentMinPosition'] = cyData.Position[imin]
-
+        dfCycle.loc[index, 'CurrentMax'] = cyData.Current[imax] #Positive peak
+        dfCycle.loc[index, 'CurrentMin'] = cyData.Current[imin] #Negative peak
+        dfCycle.loc[index, 'CurrentMaxPosition'] = cyData.Position[imax] #Positive peak position
+        dfCycle.loc[index, 'CurrentMinPosition'] = cyData.Position[imin] #Negative peak position
+        # dfCycle.loc[index, 'PosPulseWidth'] = cyData.Current #Positive peak width (s)
+        # dfCycle.loc[index, 'NegPulseWidth'] = cyData.Current #Negative peak width (s)
 
     # Stack Cycles for all experiments
     dfCycles = pd.concat([dfCycles, dfCycle])
 
-    # Generate Debug Raw Figures
-    # Plot Signal vs time
+# %% DATA PLOTTING
+
+    #Plot Signal vs Time
     XVar = 'Time'
     AxsDict, VarColors = GenFigure(dfData, xVar=XVar, axisFactor=0.1, figsize=(12, 5))
     for var, ax in AxsDict.items():
@@ -134,8 +122,7 @@ for index, r in dfExps.iterrows():
             ptdata = dfData[var]
         ax.plot(dfData[XVar], ptdata, **VarColors[var]['LineKwarg']) # Plotea cada columna
 
-    # Generates yellow separation lines to start, end of the cycles
-    for index, r in dfCycle.iterrows():
+    for index, r in dfCycle.iterrows():    # Generates yellow separation lines to start, end of the cycles
         ax.axvline(x=r.tStart, color='y', linewidth=1)
         ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=1)
         ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=1)
@@ -146,7 +133,7 @@ for index, r in dfExps.iterrows():
     fig.tight_layout()
     PDF.savefig(fig, bbox_inches='tight')
 
-    # Plot vs position
+    # Plot Signal vs Position
     XVar = 'Position'
     AxsDict, VarColors = GenFigure(dfData, xVar=XVar, figsize=(12, 5))
     for var, ax in AxsDict.items():
