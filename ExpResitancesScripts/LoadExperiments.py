@@ -21,35 +21,28 @@ plt.ion()  #activar las graficas que se vean y que no se escondan
 
 # %% Definition of folders path and files names to use
 
-# Main Root Data Folder path . Use /, not \
-DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/03-04-2025-ExpResistancePI2525/"
-#definimos entradas y salidas
+#Inputs definitions
+DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/03-04-2025-ExpResistancePI2525/" #Use /, not \
 DataDir = DataFolder + 'RawData/'
 LoadsDef = DataFolder + 'RawData/LoadsDescription.ods' #Loads excel to use
 ExpDef = DataFolder + 'RawData/Experiments.ods' #Excel name to use
-TribuId = "'PI2525Au-T1T2'" #TribuID selection from excel name
-# Output Files definition rename if needed
+TribuId = "'PI2525Au-Sampling'" #TribuID selection from excel name
+
+# Output Definitions
 # Creates a PDF in Reports folder with the name LoadReports-ExpDef(previously specified)
 PDF = PdfPages(DataFolder + 'Reports/LoadReport-{}.pdf'.format(ExpDef.split('/')[-1].split('.')[0]))
 OutFile = DataFolder + 'DataSets/Cycles-{}.pkl'.format(ExpDef.split('/')[-1].split('.')[0])
 
-# %% Load Experiments file
+# %% Read Experiments files
 dfExp = pd.read_excel(ExpDef)
-
-# If needed implement some data selection here from the excel
 dfExps = dfExp.query("TribuId == " + TribuId)
 
-# %% Load Loads file
+# %% Read Loads fles
 dfLoads = pd.read_excel(LoadsDef)
-
-# %% Add Loads Fields. Mezcla dos excels en uno con datos de lo dos escogidos
-# TODO: update for capacitors
-# TODO: update for R=infinite
 LoadsFields = ('Req', 'Gain')  # List of fields from LoadsDef to add
 for lf in LoadsFields:
     if lf not in dfExps.columns:
         dfExps.insert(1, lf, None)
-
 # Check if load exists
 for index, r in dfExps.iterrows():
     if r.RloadId in dfLoads.RloadId.values:
@@ -62,6 +55,7 @@ for index, r in dfExps.iterrows():
 
 # %% Change path to absolute and check if data files exist
 for index, r in dfExps.iterrows():
+#Check DAQ INFO
     daqFile = os.path.join(DataDir, r.DaqFile)
     if os.path.isfile(daqFile):
         dfExps.loc[index, 'DaqFile'] = daqFile
@@ -69,7 +63,7 @@ for index, r in dfExps.iterrows():
         print(f'File {daqFile} not found')
         dfExps.drop(index, inplace=True)
         print("Experiment {} Deleted".format(r.ExpId))
-
+#Check Motor INFO
     motorFile = os.path.join(DataDir, r.MotorFile)
     if os.path.isfile(motorFile):
         dfExps.loc[index, 'MotorFile'] = motorFile
@@ -78,8 +72,7 @@ for index, r in dfExps.iterrows():
         dfExps.drop(index, inplace=True)
         print("Experiment {} Deleted".format(r.ExpId))
 
-# %% load data files
-
+# %% DATA PROCESSING
 plt.ioff()
 dfCycles = pd.DataFrame()
 for index, r in dfExps.iterrows():
@@ -106,16 +99,17 @@ for index, r in dfExps.iterrows():
     # Find Transition Time
     dfCycle = FindTransitionTime(dfCycle)
 
-    # Add more calculations here Example
+    # Extract analytical information per cycle
     for index, r in dfCycle.iterrows():
         cyData = r.Data
         imax = cyData.Current.idxmax()
         imin = cyData.Current.idxmin()
-        dfCycle.loc[index, 'CurrentMax'] = cyData.Current[imax]
-        dfCycle.loc[index, 'CurrentMin'] = cyData.Current[imin]
-        dfCycle.loc[index, 'CurrentMaxPosition'] = cyData.Position[imax]
-        dfCycle.loc[index, 'CurrentMinPosition'] = cyData.Position[imin]
-
+        dfCycle.loc[index, 'CurrentMax'] = cyData.Current[imax] #Positive peak
+        dfCycle.loc[index, 'CurrentMin'] = cyData.Current[imin] #Negative peak
+        dfCycle.loc[index, 'CurrentMaxPosition'] = cyData.Position[imax] #Positive peak position
+        dfCycle.loc[index, 'CurrentMinPosition'] = cyData.Position[imin] #Negative peak position
+        dfCycle.loc[index, 'PosPulseWidth'] = cyData.Current #Positive peak width (s)
+        dfCycle.loc[index, 'NegPulseWidth'] = cyData.Current #Negative peak width (s)
 
     # Stack Cycles for all experiments
     dfCycles = pd.concat([dfCycles, dfCycle])
