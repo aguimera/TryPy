@@ -22,7 +22,7 @@ def work_LoadExperiments(DataFolder):
     plt.ion()  #activar las graficas que se vean y que no se escondan
 
     # Main Root Data Folder
-    # DataFolder = "S:/Users/Maria/DataTENG/ExpResistance/"
+    DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/03-04-2025-ExpResistancePI2525"
 
     #definimos entradas y salidas
     DataDir = DataFolder + 'RawData/'

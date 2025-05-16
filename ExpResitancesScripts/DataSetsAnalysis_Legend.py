@@ -11,11 +11,11 @@ from scipy.integrate import simpson
 from TryPy.PlotData import PlotScalarValues, GenFigure
 
 # %% Load data
-DataFolder = 'S:/Users/Maria/DataTENG/OldGITHUB/ExpElectrodes/'
-TribuId = "'Rgo'"
+DataFolder = 'S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/03-04-2025-ExpResistancePI2525/'
+TribuId = "'PI2525Au-T1T2'"
 
 #Takes the kpl generated in LoadExperiments and process it
-FileIn = DataFolder + 'DataSets/Cycles-ExperimentsrGONoRload.pkl'
+FileIn = DataFolder + 'DataSets/Cycles-Experiments.pkl'
 dfData = pd.read_pickle(FileIn)
 
 #Generate new pdf report called DataSetsAnalysis
@@ -104,7 +104,7 @@ VarColors = {
     'Voltage': {'LineKwarg': {'color': 'red',
                 'linestyle': 'solid'
                               },
-                'Limits': (-0.3, 0.3),
+                'Limits': (-10, 10),
                 'Label': 'Voltage [V]'
                 },
     'Current': {'LineKwarg': {'color': 'black',
@@ -176,10 +176,9 @@ for ex, dExp in dSel.groupby('ExpId'):
                 else:
                     ptdata = Data[var]
                 ax.plot(Data['Time'], ptdata, **VarColors[var]['LineKwarg'])
-
                 #Plot the line that separates the positive/negative peaks
                 #ax.axvline(x=r.tTransition, color='y')
-                ax.set_xlabel('Time')
+                ax.set_xlabel('Time[s]')
 
         line = axtime.plot([], [], label=VarColors['Voltage']['Label'], **VarColors['Voltage']['LineKwarg'])[0]  # modify
         legend_elements.append(line)  # modify

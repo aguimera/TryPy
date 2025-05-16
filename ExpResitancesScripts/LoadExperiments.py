@@ -15,21 +15,19 @@ from TryPy.PlotData import GenFigure
 # Analisis Estadistico con pandas. boxplots etc.
 import seaborn as sns
 
-
-
 mpl.use("QtAgg")  #backend es la herramienta de visor de graficas
 plt.close('all')  #cerrar todas las graficas antes de empezar
 plt.ion()  #activar las graficas que se vean y que no se escondan
 
 # Main Root Data Folder path . Use /, not \
-DataFolder = "S:/Users/Maria/DataTENG/OldGITHUB/ExpElectrodes/"
-TribuId = "'SwTENG'"
+DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/03-04-2025-ExpResistancePI2525/"
+TribuId = "'PI2525Au-T1T2'"
 
 #definimos entradas y salidas
 DataDir = DataFolder + 'RawData/'
-LoadsDef = DataFolder + 'RawData/LoadsDescription.xlsx'
+LoadsDef = DataFolder + 'RawData/LoadsDescription.ods'
 #WRITE HERE THE EXCEL NAME OF THE EXPERIMENT TO SELECT  DATA TO PROCESS
-ExpDef = DataFolder + 'RawData/ExperimentsrGO1405.ods'
+ExpDef = DataFolder + 'RawData/Experiments.ods'
 
 
 # Output Files definition rename if needed
@@ -48,6 +46,7 @@ dfLoads = pd.read_excel(LoadsDef)
 
 # %% Add Loads Fields. Mezcla dos excels en uno con datos de lo dos escogidos
 # TODO: update for capacitors
+# TODO: update for R=infinite
 LoadsFields = ('Req', 'Gain')  # List of fields from LoadsDef to add
 for lf in LoadsFields:
     if lf not in dfExps.columns:
@@ -63,7 +62,7 @@ for index, r in dfExps.iterrows():
         dfExps.drop(index, inplace=True)
         print("Experiment {} Deleted".format(r.ExpId))
 
-# %% Change path to absolute and check if they exist
+# %% Change path to absolute and check if data files exist
 for index, r in dfExps.iterrows():
     daqFile = os.path.join(DataDir, r.DaqFile)
     if os.path.isfile(daqFile):
