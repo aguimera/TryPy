@@ -6,6 +6,8 @@ import os
 import matplotlib.pyplot as plt  #importa la libreria de graficas
 import matplotlib as mpl
 from matplotlib.backends.backend_pdf import PdfPages  #importar libreria para hacer pdfs
+from scipy.signal import peak_widths
+
 #Archivos que seran Exportable. Importo las librerias que anton ha creado para el proyecto.
 from TryPy.Calculations import ExtractCyclesByPos, FindTransitionTime
 from TryPy.LoadData import Loadfiles
@@ -23,7 +25,7 @@ DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/03-0
 DataDir = DataFolder + 'RawData/'
 LoadsDef = DataFolder + 'RawData/LoadsDescription.ods' #Loads excel to use
 ExpDef = DataFolder + 'RawData/Experiments.ods' #Excel name to use
-TribuId = "'PI2525Au-Sampling'" #TribuID selection from excel name
+TribuId = "'PI2525Au'" #TribuID selection from excel name
 
 # Output Definitions
 # Creates a PDF in Reports folder with the name LoadReports-ExpDef(previously specified)
@@ -75,13 +77,12 @@ plt.ioff()
 dfCycles = pd.DataFrame() #Inicialización
 for index, r in dfExps.iterrows(): #Para cada fila del último dfExps
     print(f'Processing: {r.ExpId}')
-
- # Creates DataFrame with DAQ(V,I,P) and Motor(Position, Force, etc) Data
+    # Creates DataFrame with DAQ(V,I,P) and Motor(Position, Force, etc) Data
     dfData = Loadfiles(r)
-# Reference position and force
+    # Reference position and force
     dfData.Position = dfData.Position - dfData.Position.min() #Offset so position starts at 0
     dfData.Force = -dfData.Force
-# Extract Cycles
+    # Extract Cycles
     CyclesList = ExtractCyclesByPos(dfData,
                                     ContactPosition=r.ContactPosition,
                                     Latency=r.Latency,
@@ -94,18 +95,23 @@ for index, r in dfExps.iterrows(): #Para cada fila del último dfExps
 
     # Find Transition Time
     dfCycle = FindTransitionTime(dfCycle)
-
     # Extract analytical information PER CYCLE
     for index, r in dfCycle.iterrows():
         cyData = r.Data
-        imax = cyData.Current.idxmax()
-        imin = cyData.Current.idxmin()
+        imax = cyData.Current.idxmax()#Local Cycle  of the Max Current Peak found for the cycle
+        imin = cyData.Current.idxmin()#Local Cycle  of the Min Current Peak found for the cycle
+        MaxPeakWidth=peak_widths(cyData.Current,[imax],rel_height=0.5) #Positive peaks widths
+        MinPeakWidth=peak_widths(-cyData.Current,[imin],rel_height=0.5) #Negative peaks widths
+        MaxPeakWidth=MaxPeakWidth[0]*cyData.Time.diff().mean() #pass from samples to seconds
+        MinPeakWidth = MinPeakWidth[0] * cyData.Time.diff().mean()  # pass from samples to seconds
         dfCycle.loc[index, 'CurrentMax'] = cyData.Current[imax] #Positive peak
         dfCycle.loc[index, 'CurrentMin'] = cyData.Current[imin] #Negative peak
         dfCycle.loc[index, 'CurrentMaxPosition'] = cyData.Position[imax] #Positive peak position
+        dfCycle.loc[index, 'CurrentMaxTime'] = cyData.Time[imax]  # Positive peak position
+        dfCycle.loc[index, 'CurrentMinTime'] = cyData.Time[imin]  # Positive peak position
         dfCycle.loc[index, 'CurrentMinPosition'] = cyData.Position[imin] #Negative peak position
-        # dfCycle.loc[index, 'PosPulseWidth'] = cyData.Current #Positive peak width (s)
-        # dfCycle.loc[index, 'NegPulseWidth'] = cyData.Current #Negative peak width (s)
+        dfCycle.loc[index, 'PositivePulseWidth'] = MaxPeakWidth #Positive peak width (s)
+        dfCycle.loc[index, 'NegativePulseWidth'] = MinPeakWidth #Negative peak width (s)
 
     # Stack Cycles for all experiments
     dfCycles = pd.concat([dfCycles, dfCycle])
@@ -150,6 +156,8 @@ for index, r in dfExps.iterrows(): #Para cada fila del último dfExps
     fig.tight_layout()
     PDF.savefig(fig, bbox_inches='tight')
     plt.close('all')
+
+
 
 plt.ion()
 PDF.close()

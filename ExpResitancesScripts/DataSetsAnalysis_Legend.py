@@ -8,14 +8,17 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy.integrate import simpson
+# from test.handles import Cycle
+
 from TryPy.PlotData import PlotScalarValues, GenFigure
 
 # %% Load data
 DataFolder = 'S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/03-04-2025-ExpResistancePI2525/'
-TribuId = "'PI2525Au-T1T2'"
+ExpDef = DataFolder + 'RawData/Experiments.ods' #Excel name to use
+TribuId = "'PI2525Au'"
 
-#Takes the kpl generated in LoadExperiments and process it
-FileIn = DataFolder + 'DataSets/Cycles-Experiments.pkl'
+#Takes the pkl generated in LoadExperiments and process it
+FileIn = DataFolder + 'DataSets/Cycles-{}.pkl'.format(ExpDef.split('/')[-1].split('.')[0])
 dfData = pd.read_pickle(FileIn)
 
 #Generate new pdf report called DataSetsAnalysis
@@ -78,8 +81,6 @@ fig = ax.get_figure()
 ax.legend()
 PDF.savefig(fig)
 
-
-
 # Gráfica para Energia en función de T1 Y T2
 # Obtener los nombres de los diferentes valores de ExpId
 # Configurar el gráfico
@@ -89,7 +90,6 @@ fig.suptitle('Signal Variability')
 sns.scatterplot(data=dfData, x='Req', y='PositiveEnergy', ax=ax, label='PosEnergy', color='blue')
 sns.scatterplot(data=dfData, x='Req', y='NegativeEnergy', ax=ax, label='NegEnergy', color='red')
 sns.scatterplot(data=dfData, x='Req', y='Energy', ax=ax, label='Energy', color='green')
-
 ax.set_xlabel('Rload')
 ax.set_ylabel('Energy (J)')
 fig = ax.get_figure()
@@ -163,7 +163,6 @@ for ex, dExp in dSel.groupby('ExpId'):
                                PlotColumns=VarColors,
                                axisFactor=0.15,
                                ax=axtime)
-
         legend_elements = [] # modify
 
         for index, r in df.iterrows():
@@ -190,7 +189,7 @@ for ex, dExp in dSel.groupby('ExpId'):
         axtime.legend()  # modify
 
 
-        #
+
         # # plot position traces
         # AxsDict, _ = GenFigure(dfData=df.iloc[0].Data,
         #                        xVar='Position',
@@ -214,29 +213,73 @@ for ex, dExp in dSel.groupby('ExpId'):
         PDF.savefig(fig)
         plt.close(fig)
 
+#%% Pulse Width Analysis
+
+# # Peaks detection Plot
+dSel = dfData
+for exp_id, dExp in dSel.groupby('ExpId'):
+    ciclos_exp = dExp.index  # ciclos de este ExpId
+    dfCycles_exp = dSel.loc[ciclos_exp]
+    # Elegir 6 ciclos representativos: inicio, medio, final
+    if len(dfCycles_exp) < 6:
+        ciclos_seleccionados = dfCycles_exp.index.tolist()
+    else:
+        total = len(dfCycles_exp)
+        ciclos_seleccionados = [
+            dfCycles_exp.index[0],  # primero
+            dfCycles_exp.index[1],  # segundo
+            dfCycles_exp.index[total // 3],  # tercio
+            dfCycles_exp.index[total // 2],  # medio
+            dfCycles_exp.index[2 * total // 3],  # 2/3
+            dfCycles_exp.index[-1]  # último
+        ]
+
+    # Crear figura con 6 subplots
+    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+    axes = axes.flatten()
+    for i, ciclo in enumerate(ciclos_seleccionados):
+        ax = axes[i]
+        row = dExp.loc[ciclo]
+
+        time = row['Time']
+        current = row['Current']
+        peak_times = row['CurrentMaxTime']
+        peak_values = row['CurrentMaxPeaks']
+
+        ax.plot(time, current, label='Current vs Time')
+        ax.scatter(peak_times, peak_values, color='red', label='Max Peaks')
+        ax.set_title(f'Ciclo {ciclo}')
+        ax.set_xlabel("Tiempo")
+        ax.set_ylabel("Corriente")
+        ax.legend()
+
+    # En caso de que haya menos de 6 ciclos, vaciar subplots restantes
+    for j in range(len(ciclos_seleccionados), 6):
+        fig.delaxes(axes[j])
+
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    pdf.savefig(fig)
+    plt.close(fig)
 
 
-    #Guardar la figura como una imagen en la carpeta "images"
-    # image_file = f'./images/Experiment_{ex}_Rload_{gn}.png'
-    # fig.savefig(image_file)
-    # image_files.append(image_file)
+
+#Peaks Values vs Cycle Plot Analysis
+dSel = dfData
+for exp_id, dExp in dSel.groupby('ExpId'):
+    fig, ax = plt.subplots()
+    ax.scatter(dExp['Cycle'], dExp['PositivePulseWidth'], label='Pos Peak Width', color='blue', marker='o')
+    ax.scatter(dExp['Cycle'], dExp['NegativePulseWidth'], label='Neg Peak Width', color='red', marker='o')
+    ax.set_xlabel('Cycle Number')
+    ax.set_ylabel('Pulse Widths (s)')
+    ax.set_title(f'Pulse Width at Half Maximum - ExpId: {exp_id}')
+    ax.legend()
+    fig.tight_layout()
+    PDF.savefig(fig)
+    plt.close(fig)
 
 
 
-
-# # Crear animación con las imágenes
-# animation_file = 'animation.gif'
-# with imageio.get_writer(animation_file, mode='I', fps=2) as writer:
-#     for image_file in image_files:
-#         image = imageio.imread(image_file)
-#         writer.append_data(image)
-#
-# print(f'Animation saved as {animation_file}')
-
-PDF.close()
-
-
-#%%
+#%% Statistical Analysis Plots
 fig, ax = plt.subplots()
 sns.stripplot(data=dfData,
               x='Req',
@@ -244,6 +287,8 @@ sns.stripplot(data=dfData,
               hue='TribuId',
               ax=ax,
               )
+fig.suptitle('Strip Plot')
+PDF.savefig(fig)
 
 fig, ax = plt.subplots()
 sns.scatterplot(data=dfData,
@@ -252,6 +297,8 @@ sns.scatterplot(data=dfData,
                   hue='TribuId',
                   ax=ax,
                   )
+fig.suptitle('Scatter Plot')
+PDF.savefig(fig)
 
 fig, ax = plt.subplots()
 sns.boxplot(data=dfData,
@@ -261,3 +308,24 @@ sns.boxplot(data=dfData,
               #hue='Comments',
               ax=ax,
               )
+fig.suptitle('Box Plot')
+PDF.savefig(fig)
+
+
+#%% Save Plots as Images
+    #Guardar la figura como una imagen en la carpeta "images"
+    # image_file = f'./images/Experiment_{ex}_Rload_{gn}.png'
+    # fig.savefig(image_file)
+    # image_files.append(image_file)
+
+
+#Create images animation
+# animation_file = 'animation.gif'
+# with imageio.get_writer(animation_file, mode='I', fps=2) as writer:
+#     for image_file in image_files:
+#         image = imageio.imread(image_file)
+#         writer.append_data(image)
+#
+# print(f'Animation saved as {animation_file}')
+
+PDF.close()
