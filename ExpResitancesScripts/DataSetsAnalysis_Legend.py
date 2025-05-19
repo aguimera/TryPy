@@ -218,48 +218,30 @@ for ex, dExp in dSel.groupby('ExpId'):
 # # Peaks detection Plot
 dSel = dfData
 for exp_id, dExp in dSel.groupby('ExpId'):
-    ciclos_exp = dExp.index  # ciclos de este ExpId
-    dfCycles_exp = dSel.loc[ciclos_exp]
-    # Elegir 6 ciclos representativos: inicio, medio, final
-    if len(dfCycles_exp) < 6:
-        ciclos_seleccionados = dfCycles_exp.index.tolist()
-    else:
-        total = len(dfCycles_exp)
-        ciclos_seleccionados = [
-            dfCycles_exp.index[0],  # primero
-            dfCycles_exp.index[1],  # segundo
-            dfCycles_exp.index[total // 3],  # tercio
-            dfCycles_exp.index[total // 2],  # medio
-            dfCycles_exp.index[2 * total // 3],  # 2/3
-            dfCycles_exp.index[-1]  # último
-        ]
+    # Crear figura con 2 filas y 3 columnas de subplots
+    fig, axs = plt.subplots(2, 3, figsize=(15, 10))  # Puedes ajustar el tamaño con figsize
+    for gn, df in dExp.groupby('RloadId'):
+        # Acceder a cada subplot con axs[fila][columna]
+        C0=0
+        data = df.loc[df.Cycle[0], 'Data']
+        axs[0, 0].plot(data['Time'],data['Current'])  # Fila 0, Columna 0
+        axs[0, 0].plot(df['CurrentMaxTime'], df['CurrentMax'])  # Fila 0, Columna 0
 
-    # Crear figura con 6 subplots
-    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
-    axes = axes.flatten()
-    for i, ciclo in enumerate(ciclos_seleccionados):
-        ax = axes[i]
-        row = dExp.loc[ciclo]
+        # Cend = len(dfData['Cycle'])
+        axs[0, 1].plot([], [])  # Fila 0, Columna 1
+        axs[0, 1].plot([], [])  # Fila 0, Columna 1
 
-        time = row['Time']
-        current = row['Current']
-        peak_times = row['CurrentMaxTime']
-        peak_values = row['CurrentMaxPeaks']
+        axs[0, 2].plot([], [])  # Fila 0, Columna 2
+        axs[1, 0].plot([], [])  # Fila 1, Columna 0
+        axs[1, 1].plot([], [])  # Fila 1, Columna 1
+        axs[1, 2].plot([], [])  # Fila 1, Columna 2
 
-        ax.plot(time, current, label='Current vs Time')
-        ax.scatter(peak_times, peak_values, color='red', label='Max Peaks')
-        ax.set_title(f'Ciclo {ciclo}')
-        ax.set_xlabel("Tiempo")
-        ax.set_ylabel("Corriente")
-        ax.legend()
+    # Mostrar gráfico
+plt.show()
+fig.tight_layout()
+PDF.savefig(fig)
+plt.close(fig)
 
-    # En caso de que haya menos de 6 ciclos, vaciar subplots restantes
-    for j in range(len(ciclos_seleccionados), 6):
-        fig.delaxes(axes[j])
-
-    plt.tight_layout(rect=[0, 0, 1, 0.95])
-    pdf.savefig(fig)
-    plt.close(fig)
 
 
 
