@@ -5,6 +5,7 @@ from PyDAQmx.DAQmxTypes import *
 from PyDAQmx.DAQmxConstants import *
 from PyDAQmx.DAQmxFunctions import *
 from ctypes import byref
+from FileWriter import ExcelWriter
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton
 from PyQt5.QtCore import QTimer, QObject, pyqtSignal
@@ -14,12 +15,14 @@ import matplotlib.pyplot as plt
 
 from PyDAQmx import DAQmxResetDevice
 import pandas as pd
+import queue  # MIRAR queue module
+
 DAQmxResetDevice("Dev1")
 
 moveLinMot = False
-
-saved_data = np.empty((0,))
-
+sample_rate = 1000
+samples_per_chunk = 100
+timestamp = np.linspace(0, 1 / sample_rate, samples_per_chunk)
 
 class DAQSignal(QObject):
     data_ready = pyqtSignal(np.ndarray)
@@ -48,6 +51,9 @@ class DAQTask(Task):
         self.ClearTask()
 
     def EveryNCallback(self):
+
+        # ESTIC PENSANT EN UTILITZAR UNA QUEUE (import queue) en comptes de pyqtsignal
+
         read = int32()
         self.ReadAnalogF64(self.samples_per_chunk, 10.0, DAQmx_Val_GroupByChannel,
                            self.buffer, self.samples_per_chunk, byref(read), None)
@@ -66,6 +72,12 @@ class MainWindow(QMainWindow):
         self.do_task = DigitalOutputTask()
         self.do_task.StartTask()
 
+        self.FileWriter = ExcelWriter(folderPath=r"S:\TriboMedData\CharacterizationData\TENGData",
+                                      filename="RecordTest",
+                                      number_of_callbacks= 100)
+
+        self.data_frame_index = 0
+
         self.signal = DAQSignal()
         self.signal.data_ready.connect(self.update_plot)
 
@@ -79,12 +91,27 @@ class MainWindow(QMainWindow):
 
     def update_plot(self, new_data):
         global moveLinMot
-        global saved_data
         self.data = np.roll(self.data, -len(new_data))
         self.data[-len(new_data):] = new_data
         self.curve.setData(self.data)
+
         if moveLinMot:
-            saved_data = np.append(saved_data, new_data)
+            period = 1/ self.daq.sample_rate
+            samples_per_chunk = self.daq.samples_per_chunk
+
+            time_offset = self.data_frame_index * period * samples_per_chunk
+
+            time = time_offset + np.arange(0, period * samples_per_chunk, period)
+            df = pd.DataFrame({
+                'Time': time,
+                'DAQSignal': new_data
+            })
+
+            self.FileWriter.write(df)
+            self.data_frame_index += 1
+
+        elif self.FileWriter.buffer:
+            self.FileWriter.close()
 
     def toggle_linmot(self):
         global moveLinMot
@@ -103,16 +130,6 @@ class MainWindow(QMainWindow):
         self.do_task.set_line(0)
         self.do_task.StopTask()
         self.do_task.ClearTask()
-        time = np.linspace(0, 1/self.daq.samples_per_chunk, len(saved_data))
-        plt.figure(0)
-        plt.plot(time, saved_data)
-        plt.show()
-        df = pd.DataFrame({
-            'Time': time,
-            'DAQSignal': saved_data
-        })
-        df.to_excel(r"S:\TriboMedData\CharacterizationData\TENGData\Test.xlsx")
-
 
 
 class DigitalOutputTask(Task):
