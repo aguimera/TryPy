@@ -15,7 +15,7 @@ from TryPy.PlotData import PlotScalarValues, GenFigure
 # %% Load data
 DataFolder = 'S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/03-04-2025-ExpResistancePI2525/'
 ExpDef = DataFolder + 'RawData/Experiments.ods' #Excel name to use
-TribuId = "'PI2525Au'"
+TribuId = "'PI2525Au-Sampling'"
 
 #Takes the pkl generated in LoadExperiments and process it
 FileIn = DataFolder + 'DataSets/Cycles-{}.pkl'.format(ExpDef.split('/')[-1].split('.')[0])
@@ -54,26 +54,26 @@ fig, axs = PlotScalarValues(dfData=dfData,
 dSel = dfData.query("TribuId == " + TribuId)
 fig, ax = plt.subplots()
 sns.lineplot(data=dSel,
-             x='Req',
+             x='ExpId',
              y='PositiveEnergy',
              ax=ax,
              color= 'black',
              label='PositiveEnergy')
 sns.lineplot(data=dSel,
-             x='Req',
+             x='ExpId',
              y='NegativeEnergy',
              ax=ax,
              color=(0.5, 0.5, 0.5), #dark gray colour
              label='NegativeEnergy')
 sns.lineplot(data=dSel,
-             x='Req',
+             x='ExpId',
              y='Energy',
              ax=ax,
              color=(0.8, 0.8, 0.8),  # Medium gray color
              label='Energy')
 # ax.set_xscale('log')
 # ax.set_yscale('log')
-ax.set_xlabel('Load Resistance (Ohm)')
+ax.set_xlabel('ExpId')
 ax.set_ylabel('Energy (J)')
 fig.suptitle(r.TribuId)
 fig = ax.get_figure()
@@ -81,17 +81,33 @@ fig = ax.get_figure()
 ax.legend()
 PDF.savefig(fig)
 
-# Gráfica para Energia en función de T1 Y T2
+# Gráfica para Energia
 # Obtener los nombres de los diferentes valores de ExpId
 # Configurar el gráfico
 fig, ax = plt.subplots(figsize=(10, 6))
-fig.suptitle('Signal Variability')
+fig.suptitle('Energy Variability')
 # Trazar los puntos para PosEnergy, NegEnergy y Energy en función de Req
-sns.scatterplot(data=dfData, x='Req', y='PositiveEnergy', ax=ax, label='PosEnergy', color='blue')
-sns.scatterplot(data=dfData, x='Req', y='NegativeEnergy', ax=ax, label='NegEnergy', color='red')
-sns.scatterplot(data=dfData, x='Req', y='Energy', ax=ax, label='Energy', color='green')
-ax.set_xlabel('Rload')
+sns.scatterplot(data=dfData, x='ExpId', y='PositiveEnergy', ax=ax, label='PosEnergy', color='blue')
+sns.scatterplot(data=dfData, x='ExpId', y='NegativeEnergy', ax=ax, label='NegEnergy', color='red')
+sns.scatterplot(data=dfData, x='ExpId', y='Energy', ax=ax, label='Energy', color='green')
+ax.set_xlabel('ExpId')
 ax.set_ylabel('Energy (J)')
+fig = ax.get_figure()
+ax.legend()
+# plt.xticks(rotation=45)  # Rotar las etiquetas del eje x para una mejor legibilidad
+plt.tight_layout()
+PDF.savefig(fig)
+
+# Gráfica para Energia
+# Obtener los nombres de los diferentes valores de ExpId
+# Configurar el gráfico
+fig, ax = plt.subplots(figsize=(10, 6))
+fig.suptitle('Current Variability')
+# Trazar los puntos para PosEnergy, NegEnergy y Energy en función de Req
+sns.scatterplot(data=dfData, x='ExpId', y='CurrentMax', ax=ax, label='PosCurrent', color='blue')
+sns.scatterplot(data=dfData, x='ExpId', y='CurrentMin', ax=ax, label='NegCurrent', color='red')
+ax.set_xlabel('ExpId')
+ax.set_ylabel('Current(A)')
 fig = ax.get_figure()
 ax.legend()
 # plt.xticks(rotation=45)  # Rotar las etiquetas del eje x para una mejor legibilidad
@@ -104,13 +120,14 @@ VarColors = {
     'Voltage': {'LineKwarg': {'color': 'red',
                 'linestyle': 'solid'
                               },
-                'Limits': (-10, 10),
+                # 'Limits': (-3, 5),
                 'Label': 'Voltage [V]'
                 },
-    'Current': {'LineKwarg': {'color': 'black',
-                'linestyle': 'dashed'
+    'Current': {'LineKwarg': {'color': 'green',
+                 'linewidth': 0.3,
+                # 'linestyle': 'dashed'
                               },
-                'Limits': (-15, 15),
+                # 'Limits': (-15, 15),
                 'Factor': 1e6,
                 'Label': 'Current [uA]'
                 },
@@ -216,33 +233,33 @@ for ex, dExp in dSel.groupby('ExpId'):
 #%% Pulse Width Analysis
 
 # # Peaks detection Plot
-dSel = dfData
-for exp_id, dExp in dSel.groupby('ExpId'):
-    # Crear figura con 2 filas y 3 columnas de subplots
-    fig, axs = plt.subplots(2, 3, figsize=(15, 10))  # Puedes ajustar el tamaño con figsize
-    for gn, df in dExp.groupby('RloadId'):
-        # Acceder a cada subplot con axs[fila][columna]
-        C0=0
-        data = df.loc[df.Cycle[0], 'Data']
-        axs[0, 0].plot(data['Time'],data['Current'])  # Fila 0, Columna 0
-        axs[0, 0].plot(df['CurrentMaxTime'], df['CurrentMax'])  # Fila 0, Columna 0
-
-        # Cend = len(dfData['Cycle'])
-        axs[0, 1].plot([], [])  # Fila 0, Columna 1
-        axs[0, 1].plot([], [])  # Fila 0, Columna 1
-
-        axs[0, 2].plot([], [])  # Fila 0, Columna 2
-        axs[1, 0].plot([], [])  # Fila 1, Columna 0
-        axs[1, 1].plot([], [])  # Fila 1, Columna 1
-        axs[1, 2].plot([], [])  # Fila 1, Columna 2
-
-    # Mostrar gráfico
-plt.show()
-fig.tight_layout()
-PDF.savefig(fig)
-plt.close(fig)
-
-
+# dSel = dfData
+# for exp_id, dExp in dSel.groupby('ExpId'):
+#     # Crear figura con 2 filas y 3 columnas de subplots
+#     fig, axs = plt.subplots(2, 3, figsize=(15, 10))  # Puedes ajustar el tamaño con figsize
+#     for gn, df in dExp.groupby('RloadId'):
+#         # Acceder a cada subplot con axs[fila][columna]
+#         C0=0
+#         data = df.loc[df.Cycle[0], 'Data']
+#         axs[0, 0].plot(data['Time'],data['Current'])  # Fila 0, Columna 0
+#         axs[0, 0].plot(df['CurrentMaxTime'], df['CurrentMax'])  # Fila 0, Columna 0
+#
+#         # Cend = len(dfData['Cycle'])
+#         axs[0, 1].plot([], [])  # Fila 0, Columna 1
+#         axs[0, 1].plot([], [])  # Fila 0, Columna 1
+#
+#         axs[0, 2].plot([], [])  # Fila 0, Columna 2
+#         axs[1, 0].plot([], [])  # Fila 1, Columna 0
+#         axs[1, 1].plot([], [])  # Fila 1, Columna 1
+#         axs[1, 2].plot([], [])  # Fila 1, Columna 2
+#
+#     # Mostrar gráfico
+# plt.show()
+# fig.tight_layout()
+# PDF.savefig(fig)
+# plt.close(fig)
+#
+#
 
 
 #Peaks Values vs Cycle Plot Analysis

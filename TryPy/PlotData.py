@@ -9,7 +9,7 @@ import seaborn as sns
 VarColors = {
     'Voltage': {'LineKwarg': {'color': 'red', 'linewidth': 1.5
                               },
-                'Limits': (-4, 8),
+                # 'Limits': (-4, 8),
                 'Label': 'Voltage [V]'
                 },
     # 'Current': {'LineKwarg': {'color': 'k', 'linewidth': 0.1
@@ -23,7 +23,7 @@ VarColors = {
                               # 'linestyle': 'dashed',
                                'linewidth': 1,
                                },
-                 'Limits': (-1, 3),
+                 # 'Limits': (-1, 3),
                  'Label': 'Position [mm]'
                  },
 

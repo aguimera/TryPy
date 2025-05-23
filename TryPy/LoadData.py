@@ -145,7 +145,8 @@ def Loadfiles(ExpDef):
     # TODO parametrize this
     window_size = 9  # Tamaño de la ventana del filtro
     # dfData['SmoothVoltages'] = dfData['Voltage'].rolling(window=window_size).median()
-    dfData['SmoothVoltage'] = dfData['Voltage'].rolling(window=window_size).mean()
+    # dfData['SmoothVoltage'] = dfData['Voltage'].rolling(window=window_size).mean()
+    dfData['SmoothVoltage'] = dfData['Voltage'] #No hace nada, es para quitar el filtro y que funcione el código
 
     #%% Calculate Voltage, Current and Power
     dfData['VoltageAcq'] = dfData.Voltage
