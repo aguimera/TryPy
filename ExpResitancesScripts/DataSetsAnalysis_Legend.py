@@ -13,12 +13,12 @@ from scipy.integrate import simpson
 from TryPy.PlotData import PlotScalarValues, GenFigure
 
 # %% Load data
-DataFolder = 'S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/03-04-2025-ExpResistancePI2525/'
+DataFolder = 'S:/TriboMedData/CharacterizationData/TENGData/RenyunTENG/ExpElectrodes/'
 ExpDef = DataFolder + 'RawData/Experiments.ods' #Excel name to use
-TribuId = "'PI2525Au-Sampling'"
+TribuId = "'RenyunTENGRC'"
 
 #Takes the pkl generated in LoadExperiments and process it
-FileIn = DataFolder + 'DataSets/Cycles-{}.pkl'.format(ExpDef.split('/')[-1].split('.')[0])
+FileIn = DataFolder + 'DataSets/Cycles-ExperimentsNewElectrodes.pkl'
 dfData = pd.read_pickle(FileIn)
 
 #Generate new pdf report called DataSetsAnalysis

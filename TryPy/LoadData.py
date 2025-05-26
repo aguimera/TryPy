@@ -151,9 +151,9 @@ def Loadfiles(ExpDef):
 
     r.Ceq = r.Ceq / 1e6  # Pasa de microF a F
     i = np.zeros_like(dfData.Voltage)
-    alpha = (r.Req * r.Ceq) / (r.ReqReq * r.Ceq + dt)
+    alpha = (r.Req * r.Ceq) / (r.Req * r.Ceq + dt)
     beta = r.Ceq / (r.Req * r.Ceq + dt)
-    for n in dfData.Voltage.size:
+    for n in range(1, len(dfData.Voltage)):
         i[n] = alpha * i[n - 1] + beta * (dfData.Voltage[n] - dfData.Voltage[n - 1])  # Differential equation solved as discrete
 
     #%% Calculate Voltage, Current and Power

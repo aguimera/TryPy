@@ -21,11 +21,11 @@ plt.ion()  #activar las graficas que se vean y que no se escondan
 # %% Definition of folders path and files names to use
 
 #Inputs definitions
-DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/LaserCutSamples/03-04-2025-ExpResistancePI2525/" #Use /, not \
+DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/RenyunTENG/ExpElectrodes/" #Use /, not \
 DataDir = DataFolder + 'RawData/'
 LoadsDef = DataFolder + 'RawData/LoadsDescription.ods' #Loads excel to use
-ExpDef = DataFolder + 'RawData/Experiments.ods' #Excel name to use
-TribuId = "'PI2525Au-Sampling'" #TribuID selection from excel name
+ExpDef = DataFolder + 'RawData/ExperimentsNewElectrodes.xlsx' #Excel name to use
+TribuId = "'RenyunTENGRC'" #TribuID selection from excel name
 
 # Output Definitions
 # Creates a PDF in Reports folder with the name LoadReports-ExpDef(previously specified)
@@ -39,7 +39,7 @@ dfExps = dfExp.query("TribuId == " + TribuId)
 # %% Read Loads excel
 dfLoads = pd.read_excel(LoadsDef)
 #Check if Req and Gain column exists
-LoadsFields = ('Req', 'Gain')  # List of fields from LoadsDef to add
+LoadsFields = ('Req', 'Gain','Ceq')  # List of fields from LoadsDef to add
 for lf in LoadsFields:
     if lf not in dfExps.columns:
         dfExps.insert(1, lf, None)
@@ -52,9 +52,11 @@ for index, r in dfExps.iterrows():  # For each row
         print(f'Warning Load {r.RloadId} is Electrode Impedance, Assigned 80 kOhms')
         for lf in LoadsFields:
             if lf == 'Req':
-                dfExps.loc[index, lf] = 80000
-            else:
-                dfExps.loc[index, lf] = 1 # Assign a very low resistance just for trying in Ohms
+                dfExps.loc[index, lf] = 80000 # Assign a very low resistance just for trying in Ohms
+            elif lf == 'Gain':
+                dfExps.loc[index, lf] = 1
+            elif lf== 'Ceq':
+                dfExps.loc[index, lf] = float('inf')
     else:
         print(f'Warning Load {r.RloadId} not found !!!! (Assigned ∞)')
         for lf in LoadsFields:
@@ -105,9 +107,14 @@ for index, r in dfExps.iterrows(): #Para cada fila del último dfExps
 
     # Find Transition Time
     dfCycle = FindTransitionTime(dfCycle)
+
     # Extract analytical information PER CYCLE
     for index, r in dfCycle.iterrows():
         cyData = r.Data
+        # if cyData.TribuID=='RenyunTENGRC':
+        #     MiddlePos=int((cyData.LocStart + cyData.LocEnd)/2)
+        #     cyData.Voltage=-cyData.Voltage
+        #     cyData.Position
         imax = cyData.Current.idxmax()#Local Cycle  of the Max Current Peak found for the cycle
         imin = cyData.Current.idxmin()#Local Cycle  of the Min Current Peak found for the cycle
         MaxPeakWidth=peak_widths(cyData.Current,[imax],rel_height=0.5) #Positive peaks widths
