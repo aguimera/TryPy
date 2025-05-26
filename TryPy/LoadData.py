@@ -117,7 +117,8 @@ def Loadfiles(ExpDef):
     # DAQ sampling rate
     if 'Time' in dfDAQ.columns:
         nSampsDAQ = dfDAQ.Voltage.size
-        DaqFs = 1 / dfDAQ.Time.diff().mean()
+        dt=dfDAQ.Time.diff().mean() # dt entre dos muestras de tiempo, tiempo entre muestras
+        DaqFs = 1 / dt #in Hz
         print(f'Found DAQ sampling rate: {DaqFs}')
     else:
         nSampsDAQ = dfDAQ.Voltage.size
@@ -148,10 +149,18 @@ def Loadfiles(ExpDef):
     # dfData['SmoothVoltage'] = dfData['Voltage'].rolling(window=window_size).mean()
     dfData['SmoothVoltage'] = dfData['Voltage'] #No hace nada, es para quitar el filtro y que funcione el código
 
+    r.Ceq = r.Ceq / 1e6  # Pasa de microF a F
+    i = np.zeros_like(dfData.Voltage)
+    alpha = (r.Req * r.Ceq) / (r.ReqReq * r.Ceq + dt)
+    beta = r.Ceq / (r.Req * r.Ceq + dt)
+    for n in dfData.Voltage.size:
+        i[n] = alpha * i[n - 1] + beta * (dfData.Voltage[n] - dfData.Voltage[n - 1])  # Diferential equation solved as discrete
+
     #%% Calculate Voltage, Current and Power
     dfData['VoltageAcq'] = dfData.Voltage
     dfData['Voltage'] = dfData['SmoothVoltage'] / r.Gain
-    dfData['Current'] = dfData.Voltage / r.Req
+    dfData['Current'] = dfData.Voltage / r.Req #Calculates Current Through an R
     dfData['Power'] = dfData.Current * dfData.Voltage
+    dfData['CurrentRC'] = i #Calculates Current Through an RC
 
     return dfData
