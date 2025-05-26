@@ -154,7 +154,7 @@ def Loadfiles(ExpDef):
     alpha = (r.Req * r.Ceq) / (r.ReqReq * r.Ceq + dt)
     beta = r.Ceq / (r.Req * r.Ceq + dt)
     for n in dfData.Voltage.size:
-        i[n] = alpha * i[n - 1] + beta * (dfData.Voltage[n] - dfData.Voltage[n - 1])  # Diferential equation solved as discrete
+        i[n] = alpha * i[n - 1] + beta * (dfData.Voltage[n] - dfData.Voltage[n - 1])  # Differential equation solved as discrete
 
     #%% Calculate Voltage, Current and Power
     dfData['VoltageAcq'] = dfData.Voltage
