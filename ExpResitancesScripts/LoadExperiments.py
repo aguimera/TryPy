@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt  #importa la libreria de graficas
 import matplotlib as mpl
 from matplotlib.backends.backend_pdf import PdfPages  #importar libreria para hacer pdfs
 from scipy.signal import peak_widths
+from operator import concat
 
 #Archivos que seran Exportable. Importo las librerias que anton ha creado para el proyecto.
 from TryPy.Calculations import ExtractCyclesByPos, FindTransitionTime
@@ -21,7 +22,7 @@ plt.ion()  #activar las graficas que se vean y que no se escondan
 # %% Definition of folders path and files names to use
 
 #Inputs definitions
-DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/RenyunTENG/ExpElectrodes/" #Use /, not \
+DataFolder = "C:/Users/mmartic/OneDrive - INSTITUT CATALA DE NANOCIENCIA I NANOTECNOLOGIA/Documents/EXPelectrodes/" #Use /, not \
 DataDir = DataFolder + 'RawData/'
 LoadsDef = DataFolder + 'RawData/LoadsDescription.ods' #Loads excel to use
 ExpDef = DataFolder + 'RawData/ExperimentsNewElectrodes.xlsx' #Excel name to use
@@ -110,11 +111,12 @@ for index, r in dfExps.iterrows(): #Para cada fila del último dfExps
 
     # Extract analytical information PER CYCLE
     for index, r in dfCycle.iterrows():
-        cyData = r.Data
-        # if cyData.TribuID=='RenyunTENGRC':
-        #     MiddlePos=int((cyData.LocStart + cyData.LocEnd)/2)
-        #     cyData.Voltage=-cyData.Voltage
-        #     cyData.Position
+        cyData=r.Data
+        PuntoMedio=len(cyData.Position)//2 #División entera
+        PositiveCurrentRC = cyData.CurrentRC[:PuntoMedio]
+        InversedCurrentRC=-cyData.CurrentRC[PuntoMedio:]
+        InvCurrentRCCycle=pd.concat([PositiveCurrentRC, InversedCurrentRC], ignore_index=True)
+        cyData['InvCurrentCycle']=InvCurrentRCCycle #Add the new calculated voltage to DATA
         imax = cyData.Current.idxmax()#Local Cycle  of the Max Current Peak found for the cycle
         imin = cyData.Current.idxmin()#Local Cycle  of the Min Current Peak found for the cycle
         MaxPeakWidth=peak_widths(cyData.Current,[imax],rel_height=0.5) #Positive peaks widths
@@ -129,7 +131,7 @@ for index, r in dfExps.iterrows(): #Para cada fila del último dfExps
         dfCycle.loc[index, 'CurrentMinPosition'] = cyData.Position[imin] #Negative peak position
         dfCycle.loc[index, 'PositivePulseWidth'] = MaxPeakWidth #Positive peak width (s)
         dfCycle.loc[index, 'NegativePulseWidth'] = MinPeakWidth #Negative peak width (s)
-
+        dfCycle.at[index, 'Data'] = cyData
     # Stack Cycles for all experiments
     dfCycles = pd.concat([dfCycles, dfCycle])
 

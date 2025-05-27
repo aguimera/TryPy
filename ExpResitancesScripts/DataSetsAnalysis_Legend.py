@@ -13,8 +13,8 @@ from scipy.integrate import simpson
 from TryPy.PlotData import PlotScalarValues, GenFigure
 
 # %% Load data
-DataFolder = 'S:/TriboMedData/CharacterizationData/TENGData/RenyunTENG/ExpElectrodes/'
-ExpDef = DataFolder + 'RawData/Experiments.ods' #Excel name to use
+DataFolder = 'C:/Users/mmartic/OneDrive - INSTITUT CATALA DE NANOCIENCIA I NANOTECNOLOGIA/Documents/EXPelectrodes/'
+ExpDef = DataFolder + 'RawData/ExperimentsNewElectrodes.xlsx' #Excel name to use
 TribuId = "'RenyunTENGRC'"
 
 #Takes the pkl generated in LoadExperiments and process it
@@ -117,19 +117,32 @@ PDF.savefig(fig)
 # %% Plot experiment time traces
 
 VarColors = {
-    'Voltage': {'LineKwarg': {'color': 'red',
-                'linestyle': 'solid'
+    'InvCurrentCycle': {'LineKwarg': {'color': 'red', 'linewidth': 1.5
                               },
-                # 'Limits': (-3, 5),
-                'Label': 'Voltage [V]'
+                 #'Limits': (-4, 8),
+                'Label': 'CurrentInversed [V]'
                 },
-    'Current': {'LineKwarg': {'color': 'green',
-                 'linewidth': 0.3,
-                # 'linestyle': 'dashed'
+    #'Voltage': {'LineKwarg': {'color': 'black',
+    #            'linestyle': 'solid'
+    #                         },
+    #            # 'Limits': (-3, 5),
+    #            'Label': 'Voltage [V]'
+    #            },
+    #'Current': {'LineKwarg': {'color': 'green',
+    #             'linewidth': 0.3,
+    #            # 'linestyle': 'dashed'
+    #                          },
+    #            # 'Limits': (-15, 15),
+    #            'Factor': 1e6,
+    #            'Label': 'Current [uA]'
+    #            },
+    'CurrentRC': {'LineKwarg': {'color': 'green',
+                              'linewidth': 0.3,
+                              # 'linestyle': 'dashed'
                               },
                 # 'Limits': (-15, 15),
                 'Factor': 1e6,
-                'Label': 'Current [uA]'
+                'Label': 'Current RC [uA]'
                 },
     'Position': {'LineKwarg': {'color': 'gray',
                                'linestyle': 'dashed',
@@ -196,9 +209,9 @@ for ex, dExp in dSel.groupby('ExpId'):
                 #ax.axvline(x=r.tTransition, color='y')
                 ax.set_xlabel('Time[s]')
 
-        line = axtime.plot([], [], label=VarColors['Voltage']['Label'], **VarColors['Voltage']['LineKwarg'])[0]  # modify
+        line = axtime.plot([], [], label=VarColors['InvCurrentCycle']['Label'], **VarColors['InvCurrentCycle']['LineKwarg'])[0]  # modify
         legend_elements.append(line)  # modify
-        line = axtime.plot([], [], label=VarColors['Current']['Label'], **VarColors['Current']['LineKwarg'])[0]  # modify
+        line = axtime.plot([], [], label=VarColors['CurrentRC']['Label'], **VarColors['CurrentRC']['LineKwarg'])[0]  # modify
         legend_elements.append(line)  # modify
         line = axtime.plot([], [], label=VarColors['Position']['Label'], **VarColors['Position']['LineKwarg'])[0]  # modify
         legend_elements.append(line)  # modify

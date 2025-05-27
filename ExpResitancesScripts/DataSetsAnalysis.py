@@ -11,10 +11,10 @@ from scipy.integrate import simpson
 from TryPy.PlotData import PlotScalarValues, GenFigure
 
 # %% Load data
-DataFolder = 'S:/Users/Maria/DataTENG/ExpResistance/'
+DataFolder = 'C:/Users/mmartic/OneDrive - INSTITUT CATALA DE NANOCIENCIA I NANOTECNOLOGIA/Documents/EXPelectrodes/'
 
 #Takes the kpl generated in LoadExperiments and process it
-FileIn = DataFolder + 'DataSets/Cycles-Experiments.pkl'
+FileIn = DataFolder + 'DataSets/Cycles-ExperimentsNewElectrodes.pkl'
 dfData = pd.read_pickle(FileIn)
 
 #Generate new pdf report called DataSetsAnalysis
