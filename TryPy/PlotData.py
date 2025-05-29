@@ -8,14 +8,9 @@ import seaborn as sns
 
 VarColors = {
 
-    'InvCurrentCycle': {'LineKwarg': {'color': 'red', 'linewidth': 1.5
-                              },
-                 'Limits': (-4, 8),
-                'Label': 'Voltage [V]'
-                },
     'Voltage': {'LineKwarg': {'color': 'black', 'linewidth': 1.5
                               },
-                 'Limits': (-4, 8),
+                 #'Limits': (-4, 8),
                 'Label': 'Voltage [V]'
                 },
     # 'Current': {'LineKwarg': {'color': 'k', 'linewidth': 0.1

@@ -26,7 +26,7 @@ DataFolder = "C:/Users/mmartic/OneDrive - INSTITUT CATALA DE NANOCIENCIA I NANOT
 DataDir = DataFolder + 'RawData/'
 LoadsDef = DataFolder + 'RawData/LoadsDescription.ods' #Loads excel to use
 ExpDef = DataFolder + 'RawData/ExperimentsNewElectrodes.xlsx' #Excel name to use
-TribuId = "'RenyunTENGRC'" #TribuID selection from excel name
+TribuId = "'RC-TENG'" #TribuID selection from excel name
 
 # Output Definitions
 # Creates a PDF in Reports folder with the name LoadReports-ExpDef(previously specified)
@@ -112,11 +112,6 @@ for index, r in dfExps.iterrows(): #Para cada fila del último dfExps
     # Extract analytical information PER CYCLE
     for index, r in dfCycle.iterrows():
         cyData=r.Data
-        PuntoMedio=len(cyData.Position)//2 #División entera
-        PositiveCurrentRC = cyData.CurrentRC[:PuntoMedio]
-        InversedCurrentRC=-cyData.CurrentRC[PuntoMedio:]
-        InvCurrentRCCycle=pd.concat([PositiveCurrentRC, InversedCurrentRC], ignore_index=True)
-        cyData['InvCurrentCycle']=InvCurrentRCCycle #Add the new calculated voltage to DATA
         imax = cyData.Current.idxmax()#Local Cycle  of the Max Current Peak found for the cycle
         imin = cyData.Current.idxmin()#Local Cycle  of the Min Current Peak found for the cycle
         MaxPeakWidth=peak_widths(cyData.Current,[imax],rel_height=0.5) #Positive peaks widths
@@ -131,7 +126,6 @@ for index, r in dfExps.iterrows(): #Para cada fila del último dfExps
         dfCycle.loc[index, 'CurrentMinPosition'] = cyData.Position[imin] #Negative peak position
         dfCycle.loc[index, 'PositivePulseWidth'] = MaxPeakWidth #Positive peak width (s)
         dfCycle.loc[index, 'NegativePulseWidth'] = MinPeakWidth #Negative peak width (s)
-        dfCycle.at[index, 'Data'] = cyData
     # Stack Cycles for all experiments
     dfCycles = pd.concat([dfCycles, dfCycle])
 

@@ -16,6 +16,9 @@ MotColumnRenames = {
 DQAColumnRenames = {
     'Input 0': 'Voltage',
     'Unnamed: 1': 'Time',
+    'Original Data': 'Voltage DC',
+    'AC Signal': 'Voltage',
+    'AC with Trend': 'Voltage with Trend',
 }
 
 #%% Load Motor Raw Data
@@ -82,7 +85,21 @@ def LoadDAQFile(DaqFile):
         if 'DQAColumnRenames' in globals():
             dfDAQ = dfDAQ.rename(columns=DQAColumnRenames)
         return dfDAQ
-
+    elif DaqFile.endswith('.csv'):
+        dfDAQ = pd.read_csv(DaqFile,
+                            header=0,
+                            index_col=False,
+                            delimiter=',',
+                            decimal='.')
+        # drop Non-defined columns
+        dropcols = []
+        for col in dfDAQ.columns:
+            if col not in DQAColumnRenames.keys():
+                dropcols.append(col)
+        dfDAQ = dfDAQ.drop(columns=dropcols)
+        # rename columns
+        dfDAQ = dfDAQ.rename(columns=DQAColumnRenames)
+        return dfDAQ
     else:
         print(f'❌ File {DaqFile} not recognized')
         return None
@@ -152,6 +169,7 @@ def Loadfiles(ExpDef):
     #Calcula Corriente a través de un RC
     r.Ceq = r.Ceq / 1e6  # Pasa de microF a F
     i = np.zeros_like(dfData.Voltage)
+    dt=dfDAQ.Time.diff().mean()
     alpha = (r.Req * r.Ceq) / (r.Req * r.Ceq + dt)
     beta = r.Ceq / (r.Req * r.Ceq + dt)
     for n in range(1, len(dfData.Voltage)):

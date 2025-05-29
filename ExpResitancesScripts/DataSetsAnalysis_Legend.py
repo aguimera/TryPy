@@ -15,7 +15,7 @@ from TryPy.PlotData import PlotScalarValues, GenFigure
 # %% Load data
 DataFolder = 'C:/Users/mmartic/OneDrive - INSTITUT CATALA DE NANOCIENCIA I NANOTECNOLOGIA/Documents/EXPelectrodes/'
 ExpDef = DataFolder + 'RawData/ExperimentsNewElectrodes.xlsx' #Excel name to use
-TribuId = "'RenyunTENGRC'"
+TribuId = "'RC-TENG'"
 
 #Takes the pkl generated in LoadExperiments and process it
 FileIn = DataFolder + 'DataSets/Cycles-ExperimentsNewElectrodes.pkl'
@@ -117,11 +117,6 @@ PDF.savefig(fig)
 # %% Plot experiment time traces
 
 VarColors = {
-    'InvCurrentCycle': {'LineKwarg': {'color': 'red', 'linewidth': 1.5
-                              },
-                 #'Limits': (-4, 8),
-                'Label': 'CurrentInversed [V]'
-                },
     #'Voltage': {'LineKwarg': {'color': 'black',
     #            'linestyle': 'solid'
     #                         },
@@ -209,7 +204,7 @@ for ex, dExp in dSel.groupby('ExpId'):
                 #ax.axvline(x=r.tTransition, color='y')
                 ax.set_xlabel('Time[s]')
 
-        line = axtime.plot([], [], label=VarColors['InvCurrentCycle']['Label'], **VarColors['InvCurrentCycle']['LineKwarg'])[0]  # modify
+        line = axtime.plot([], [], label=VarColors['Voltage']['Label'], **VarColors['Voltage']['LineKwarg'])[0]  # modify
         legend_elements.append(line)  # modify
         line = axtime.plot([], [], label=VarColors['CurrentRC']['Label'], **VarColors['CurrentRC']['LineKwarg'])[0]  # modify
         legend_elements.append(line)  # modify
