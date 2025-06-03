@@ -8,7 +8,7 @@ import seaborn as sns
 
 VarColors = {
 
-    'Voltage': {'LineKwarg': {'color': 'black', 'linewidth': 1.5
+    'Voltage': {'LineKwarg': {'color': 'red', 'linewidth': 2
                               },
                  #'Limits': (-4, 8),
                 'Label': 'Voltage [V]'
@@ -20,18 +20,18 @@ VarColors = {
     #             'Label': 'Current [uA]'
     #             },
 
-    'CurrentRC': {'LineKwarg': {'color': 'green', 'linewidth': 0.1
-                              },
-                # 'Limits': (-15, 15),
-                'Factor': 1e6,
-                'Label': 'Current RC [uA]'
-                },
+    #'CurrentRC': {'LineKwarg': {'color': 'blue', 'linewidth': 2
+    #                         },
+    #           # 'Limits': (-15, 15),
+    #            'Factor': 1e6,
+    #            'Label': 'Current RC [uA]'
+    #            },
 
     'Position': {'LineKwarg': {'color': 'k',
                               # 'linestyle': 'dashed',
                                'linewidth': 1,
                                },
-                 # 'Limits': (-1, 3),
+                'Limits': (-2, 30),
                  'Label': 'Position [mm]'
                  },
 
@@ -104,14 +104,14 @@ def GenFigure(dfData, xVar='Time', PlotColumns=None, ax=None, axisFactor=0.2, **
             axp.spines.right.set_position(("axes", 1 + (axisFactor * (ic - 1))))
         ic += 1
         if 'Label' in prop:
-            axp.set_ylabel(prop['Label'])
+            axp.set_ylabel(prop['Label'],fontsize=15)
         else:
             axp.set_ylabel(var)
 
         color = prop['LineKwarg']['color']
         axp.yaxis.label.set_color(color)
         axp.set_xlabel('Time [s]')
-        axp.tick_params(axis='y', colors=color)
+        axp.tick_params(axis='y', colors=color,labelsize=15)
 
         if 'Limits' in prop:
             axp.set_ylim(prop['Limits'][0], prop['Limits'][1])

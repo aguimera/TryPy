@@ -53,7 +53,7 @@ for index, r in dfExps.iterrows():  # For each row
         print(f'Warning Load {r.RloadId} is Electrode Impedance, Assigned 80 kOhms')
         for lf in LoadsFields:
             if lf == 'Req':
-                dfExps.loc[index, lf] = 80000 # Assign a very low resistance just for trying in Ohms
+                dfExps.loc[index, lf] = 1000 # Assign a very low resistance just for trying in Ohms
             elif lf == 'Gain':
                 dfExps.loc[index, lf] = 1
             elif lf== 'Ceq':
@@ -141,10 +141,10 @@ for index, r in dfExps.iterrows(): #Para cada fila del último dfExps
             ptdata = dfData[var]
         ax.plot(dfData[XVar], ptdata, **VarColors[var]['LineKwarg']) # Plotea cada columna
 
-    for index, r in dfCycle.iterrows():    # Generates yellow separation lines to start, end of the cycles
-        ax.axvline(x=r.tStart, color='y', linewidth=0.5)
-        ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=0.5)
-        ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=0.5)
+    #for index, r in dfCycle.iterrows():    # Generates yellow separation lines to start, end of the cycles
+    #    ax.axvline(x=r.tStart, color='y', linewidth=0.5)
+    #    ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=0.5)
+    #    ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=0.5)
 
     fig = ax.get_figure()
     fig.suptitle(r.ExpId)

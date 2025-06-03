@@ -17,8 +17,8 @@ DQAColumnRenames = {
     'Input 0': 'Voltage',
     'Unnamed: 1': 'Time',
     'Original Data': 'Voltage DC',
-    'AC Signal': 'Voltage',
-    'AC with Trend': 'Voltage with Trend',
+    'AC Signal': 'Voltage with Trend',
+    'AC with Trend': 'Voltage',
 }
 
 #%% Load Motor Raw Data

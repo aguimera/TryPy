@@ -117,34 +117,36 @@ PDF.savefig(fig)
 # %% Plot experiment time traces
 
 VarColors = {
-    #'Voltage': {'LineKwarg': {'color': 'black',
-    #            'linestyle': 'solid'
-    #                         },
-    #            # 'Limits': (-3, 5),
-    #            'Label': 'Voltage [V]'
-    #            },
-    #'Current': {'LineKwarg': {'color': 'green',
-    #             'linewidth': 0.3,
-    #            # 'linestyle': 'dashed'
+    'Voltage': {'LineKwarg': {'color': 'red',
+               'linewidth': 3,
+               'linestyle': 'solid'
+                            },
+               #'Limits': (-0.04, 0.02),
+               'Label': 'Voltage [V]'
+              },
+    #'Current': {'LineKwarg': {'color': 'blue',
+    #            'linewidth': 3,
+    #           # 'linestyle': 'dashed'
     #                          },
-    #            # 'Limits': (-15, 15),
+    #            #'Limits': (-25, 15),
     #            'Factor': 1e6,
     #            'Label': 'Current [uA]'
-    #            },
-    'CurrentRC': {'LineKwarg': {'color': 'green',
-                              'linewidth': 0.3,
-                              # 'linestyle': 'dashed'
+    #           },
+    'CurrentRC': {'LineKwarg': {'color': 'blue',
+                             'linewidth': 3,
+                             # 'linestyle': 'dashed'
                               },
-                # 'Limits': (-15, 15),
+                'Limits': (-15, 15),
                 'Factor': 1e6,
                 'Label': 'Current RC [uA]'
                 },
-    'Position': {'LineKwarg': {'color': 'gray',
+    'Position': {'LineKwarg': {'color': 'black',
                                'linestyle': 'dashed',
-                               'linewidth': 0.5,
+                               'linewidth': 2,
                                },
                  # 'Limits': (-5, 5),
-                 'Label': 'Position [mm]'
+                 'Label': 'Position [mm]',
+                 'LabelFontsize': 15,
                  },
     # 'Force': {'LineKwarg': {'color': 'g',
     #                         'linestyle': 'dashed',
@@ -186,23 +188,25 @@ for ex, dExp in dSel.groupby('ExpId'):
         AxsDict, _ = GenFigure(dfData=df.iloc[0].Data,
                                xVar='Time',
                                PlotColumns=VarColors,
-                               axisFactor=0.15,
+                               axisFactor=0.1,
                                ax=axtime)
         legend_elements = [] # modify
 
-        for index, r in df.iterrows():
+        for index, r in df.iloc[20:21].iterrows(): #Selects which cycles index wants to display
             Data = r.Data
 
             for var, ax in AxsDict.items():
-
                 if 'Factor' in VarColors[var]:
                     ptdata = Data[var] * VarColors[var]['Factor']
                 else:
                     ptdata = Data[var]
-                ax.plot(Data['Time'], ptdata, **VarColors[var]['LineKwarg'])
+                ax.plot(Data['Time'], ptdata, **VarColors[var]['LineKwarg']) #MAIN PLOTTING LINE
                 #Plot the line that separates the positive/negative peaks
                 #ax.axvline(x=r.tTransition, color='y')
-                ax.set_xlabel('Time[s]')
+                #ax.set_xlabel('Time[s]',fontsize=15)
+
+                axtime.set_xlabel('Time [s]', fontsize=15)
+                axtime.tick_params(axis='both', labelsize=15)
 
         line = axtime.plot([], [], label=VarColors['Voltage']['Label'], **VarColors['Voltage']['LineKwarg'])[0]  # modify
         legend_elements.append(line)  # modify
@@ -211,7 +215,7 @@ for ex, dExp in dSel.groupby('ExpId'):
         line = axtime.plot([], [], label=VarColors['Position']['Label'], **VarColors['Position']['LineKwarg'])[0]  # modify
         legend_elements.append(line)  # modify
 
-        axtime.legend()  # modify
+        axtime.legend(handles=legend_elements, fontsize=15)  # modify
 
 
 
