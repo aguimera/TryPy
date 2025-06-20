@@ -167,19 +167,19 @@ def Loadfiles(ExpDef):
     dfData['SmoothVoltage'] = dfData['Voltage'] #No hace nada, es para quitar el filtro y que funcione el código
 
     #Calcula Corriente a través de un RC
-    r.Ceq = r.Ceq / 1e6  # Pasa de microF a F
-    i = np.zeros_like(dfData.Voltage)
-    dt=dfDAQ.Time.diff().mean()
-    alpha = (r.Req * r.Ceq) / (r.Req * r.Ceq + dt)
-    beta = r.Ceq / (r.Req * r.Ceq + dt)
-    for n in range(1, len(dfData.Voltage)):
-        i[n] = alpha * i[n - 1] + beta * (dfData.Voltage[n] - dfData.Voltage[n - 1])  # Differential equation solved as discrete
+    #r.Ceq = r.Ceq / 1e6  # Pasa de microF a F
+    # i = np.zeros_like(dfData.Voltage)
+    # dt=dfDAQ.Time.diff().mean()
+    # #alpha = (r.Req * r.Ceq) / (r.Req * r.Ceq + dt)
+    # #beta = r.Ceq / (r.Req * r.Ceq + dt)
+    # for n in range(1, len(dfData.Voltage)):
+    #     i[n] = alpha * i[n - 1] + beta * (dfData.Voltage[n] - dfData.Voltage[n - 1])  # Differential equation solved as discrete
 
     #%% Adds Voltage, Current and Power
     dfData['VoltageAcq'] = dfData.Voltage
     dfData['Voltage'] = dfData['SmoothVoltage'] / r.Gain
     dfData['Current'] = dfData.Voltage / r.Req #Calculates Current Through an R
     dfData['Power'] = dfData.Current * dfData.Voltage
-    dfData['CurrentRC'] = i #Calculates Current Through an RC
+    #dfData['CurrentRC'] = i #Calculates Current Through an RC
 
     return dfData

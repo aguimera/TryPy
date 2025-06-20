@@ -22,11 +22,11 @@ plt.ion()  #activar las graficas que se vean y que no se escondan
 # %% Definition of folders path and files names to use
 
 #Inputs definitions
-DataFolder = "C:/Users/mmartic/OneDrive - INSTITUT CATALA DE NANOCIENCIA I NANOTECNOLOGIA/Documents/EXPelectrodes/" #Use /, not \
+DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/RenyunTENG/ExpResistance/" #Use /, not \
 DataDir = DataFolder + 'RawData/'
 LoadsDef = DataFolder + 'RawData/LoadsDescription.ods' #Loads excel to use
-ExpDef = DataFolder + 'RawData/ExperimentsNewElectrodes.xlsx' #Excel name to use
-TribuId = "'RC-TENG'" #TribuID selection from excel name
+ExpDef = DataFolder + 'RawData/Experiments.ods' #Excel name to use
+TribuId = "'SwTENG-R'" #TribuID selection from excel name
 
 # Output Definitions
 # Creates a PDF in Reports folder with the name LoadReports-ExpDef(previously specified)
@@ -56,8 +56,8 @@ for index, r in dfExps.iterrows():  # For each row
                 dfExps.loc[index, lf] = 1000 # Assign a very low resistance just for trying in Ohms
             elif lf == 'Gain':
                 dfExps.loc[index, lf] = 1
-            elif lf== 'Ceq':
-                dfExps.loc[index, lf] = float('inf')
+            # elif lf== 'Ceq':
+            #     dfExps.loc[index, lf] = float('inf')
     else:
         print(f'Warning Load {r.RloadId} not found !!!! (Assigned ∞)')
         for lf in LoadsFields:
