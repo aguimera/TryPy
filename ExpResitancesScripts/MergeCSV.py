@@ -28,7 +28,7 @@ def sort_function(string):
     return int(string.split("_")[-1].split(".")[0])
 
 
-def CSV_merge(folder_path: str, save_path: str, filename: str):
+def CSV_merge(folder_path: str, save_path_folder: str, filename: str):
     files = [f for f in os.listdir(folder_path) if f.endswith('.csv')]
     files.sort(key=sort_function)
 
@@ -36,23 +36,58 @@ def CSV_merge(folder_path: str, save_path: str, filename: str):
     combined_DataFrame = pd.DataFrame()
 
     # Iterate the CSV files found in the folder path
+    print("Merging...")
     for file in files:
         # Read CSV
         df = pd.read_csv(os.path.join(folder_path, file), sep=';')
+
+        print(file)
 
         # Concatenate CSV file
         combined_DataFrame = pd.concat([combined_DataFrame, df], ignore_index=True)
 
     # Save concatenated DataFrame
-    combined_DataFrame.to_csv(os.path.join(save_path, filename), index=False)
+    combined_DataFrame.to_csv(os.path.join(save_path_folder, filename + ".csv"), index=False, sep=';')
 
-    return os.path.join(save_path, filename)
+    print("Data saved to location:", os.path.join(save_path_folder, filename + ".csv"))
+
+    return os.path.join(save_path_folder, filename + ".csv")
+
+def Excel_merge(folder_path: str, save_path_folder: str, filename: str):
+    files = [f for f in os.listdir(folder_path) if f.endswith('.xlsx')]
+    files.sort()
+
+    # Create an empty DataFrame
+    combined_DataFrame = pd.DataFrame()
+
+    # Iterate the Excel files found in the folder path
+    print("Merging...")
+    for file in files:
+        # Read Excel
+        df = pd.read_excel(os.path.join(folder_path, file))
+
+        print(file)
+
+        # Concatenate CSV file
+        combined_DataFrame = pd.concat([combined_DataFrame, df], ignore_index=True)
+
+    # Save concatenated DataFrame
+    combined_DataFrame.to_excel(os.path.join(save_path_folder, filename + ".xlsx"), index=False)
+
+    print("Data saved to location:", os.path.join(save_path_folder, filename + ".xlsx"))
+
+    return os.path.join(save_path_folder, filename + ".xlsx")
 
 
 if __name__ == "__main__":
 
     # Lista de archivos CSV a combinar
-    carpeta = r'C:\Users\mmartic\Desktop\test'  # Cambia esta ruta
+    carpeta = r'C:/Users/mmartic/Desktop/24_hour_test/'  # Cambia esta ruta
+
+    CSV_path = CSV_merge(folder_path=carpeta, save_path_folder=carpeta, filename="Motor_01")
+    Excel_path = Excel_merge(folder_path=carpeta, save_path_folder=carpeta, filename="DAQ_01")
+    df = pd.read_csv(CSV_path, sep=';')
+    df_DAQ = pd.read_excel(Excel_path)
 
     time_array = np.empty((df.shape[0],))
 
