@@ -89,6 +89,7 @@ if __name__ == "__main__":
     df = pd.read_csv(CSV_path, sep=';')
     df_DAQ = pd.read_excel(Excel_path)
 
+
     time_array = np.empty((df.shape[0],))
 
     for index, row in df.iterrows():
