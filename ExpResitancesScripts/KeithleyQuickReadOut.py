@@ -1,69 +1,82 @@
 import serial
 import time
-import csv
+import pandas as pd
+import matplotlib.pyplot as plt
+from datetime import datetime
 
-# Configura tu puerto COM aquí
-PORT = 'COM3'       # <-- CAMBIA esto al puerto correcto
-BAUDRATE = 9600
-DURATION = 60       # Duración total en segundos
-INTERVAL = 0.02        # Intervalo de muestreo en segundos
-OUTPUT_FILE = 'corriente_vs_tiempo.csv'
-
-# Abre conexión serial
-ser = serial.Serial(
-    port=PORT,
-    baudrate=BAUDRATE,
-    bytesize=serial.EIGHTBITS,
-    parity=serial.PARITY_NONE,
-    stopbits=serial.STOPBITS_ONE,
-    timeout=2
-)
-
-# Espera a que el puerto esté listo
-time.sleep(2)
-
-# Configura el Keithley 6514 para medición continua
-ser.write(b'*RST\n')                         # Reinicia configuración
-time.sleep(0.5)
-ser.write(b':FUNC "CURR"\n')                # Selecciona medición de corriente
-ser.write(b':FORM:ELEM CURR\n')             # Solo devuelve corriente
-ser.write(b':TRIG:COUNT INF\n')             # Modo de lectura continua
-ser.write(b':INIT\n')
+from serial.serialutil import PARITY_EVEN, STOPBITS_ONE, EIGHTBITS
 
 
-# ⬇️ PRUEBA DE TASA DE MUESTREO REAL
-print("\nMedición de tasa de muestreo real (sin INTERVAL)...")
-prev_time = time.time()
-for i in range(10):  # Haz 10 lecturas de prueba
-    ser.write(b':READ?\n')
-    response = ser.readline().decode().strip()
-    now = time.time()
-    print(f"Muestra {i + 1}: {now - prev_time:.4f} s, Valor: {response}")
-    prev_time = now
+def read_keithley_6514(sampling_rate, duration_sec, port="COM9", baudrate=9600, parity=PARITY_EVEN, bytesize=EIGHTBITS, stopbits=STOPBITS_ONE, output_image='current_vs_time.png', output_csv='data.csv'):
+    # Setup serial connection
+    ser = serial.Serial(port=port, baudrate=baudrate, parity=parity, bytesize=bytesize,stopbits=stopbits, timeout=1)
+    time.sleep(2)  # Wait for connection to stabilize
 
-# Abre archivo CSV
-with open(OUTPUT_FILE, mode='w', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerow(['Tiempo (s)', 'Corriente (A)'])
+    # Initialize Keithley 6514 for current measurement
+    ser.write(b'*RST\n')             # Reset
+    time.sleep(1)
+    ser.write(b':FUNC "CURR"\n')     # Set function to current
+    ser.write(b':FORM:ELEM READ\n')  # Set output to return only reading
+    ser.flushInput()
 
-    print("Grabando datos...")
-    t0 = time.time()
+    # Timing setup
+    interval = 1.0 / sampling_rate
+    total_samples = int(duration_sec * sampling_rate)
+
+    print(f"Collecting {total_samples} samples at {sampling_rate} Hz for {duration_sec} seconds...")
+
+    times = []
+    currents = []
+    start_time = time.time()
+
     while True:
-        t = time.time() - t0
-        if t > DURATION:
+        current_time = time.time() - start_time
+        if current_time > duration_sec:
             break
 
         ser.write(b':READ?\n')
-        response = ser.readline().decode().strip()
+        line = ser.readline().decode().strip()
 
         try:
-            current = float(response)
-            writer.writerow([round(t, 2), current])
-            print(f"{t:.2f} s\t{current:.3e} A")
+            current = float(line)
         except ValueError:
-            print(f"Error de lectura: {response}")
+            current = float('nan')  # in case of bad read
 
-        time.sleep(INTERVAL)
+        times.append(current_time)
+        currents.append(current)
+        print(f"{current_time:.3f}s: {current} A")
 
-print("Grabación finalizada.")
-ser.close()
+        # Control sampling rate
+        #time.sleep(max(0, (1.0 / sampling_rate)))
+
+    ser.close()
+
+    # Save data
+    df = pd.DataFrame({'Time (s)': times, 'Current (A)': currents})
+    df.to_csv(output_csv, index=False)
+
+    # Plot
+    plt.figure(figsize=(10, 6))
+    plt.plot(times, currents, label='Current (A)', color='blue')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Current (A)')
+    plt.title('Current vs Time')
+    plt.grid(True)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(output_image)
+    plt.show()
+
+    print(f"\nPlot saved as '{output_image}', data saved as '{output_csv}'.")
+
+
+# Example usage:
+if __name__ == "__main__":
+    read_keithley_6514(
+        port='COM9',              # Change this to your actual COM port (e.g., 'COM3' on Windows or '/dev/ttyUSB0' on Linux)
+        baudrate=9600,            # Keithley 6514 default baudrate
+        sampling_rate=500,          # in Hz
+        duration_sec=10,          # total duration in seconds
+        output_image='current_vs_time.png',
+        output_csv='data.csv'
+    )
