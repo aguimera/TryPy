@@ -22,16 +22,13 @@ plt.close('all')  #cerrar todas las graficas antes de empezar
 plt.ion()  #activar las graficas que se vean y que no se escondan
 
 # %% Definition of folders path and files names to use
-
 print("Please provide a folder location")
 root = tk.Tk()
 root.withdraw()  # Amaga la finestra princial de tkinter
 root.lift()  # Posa la finestra emergent en primer pla
 root.attributes('-topmost', True)  # La finestra sempre al davant
-
 # Carpeta con la lista de archivos CSV y Excel a combinar
-DataFolder = filedialog.askdirectory(title="Select DataFolder directory")
-
+DataFolder = filedialog.askdirectory(title="Select Experiment Folder directory")
 if DataFolder:
     DataFolder = DataFolder.replace("/", "\\")
 
@@ -40,10 +37,8 @@ root = tk.Tk()
 root.withdraw()  # Amaga la finestra princial de tkinter
 root.lift()  # Posa la finestra emergent en primer pla
 root.attributes('-topmost', True)  # La finestra sempre al davant
-
 # Carpeta con la lista de archivos CSV y Excel a combinar
-LoadsDef = filedialog.askopenfilename(title="Select LoadsDef file")
-
+LoadsDef = filedialog.askopenfilename(title="Select Loads Description file")
 if LoadsDef:
     LoadsDef = LoadsDef.replace("/", "\\")
 
@@ -52,26 +47,23 @@ root = tk.Tk()
 root.withdraw()  # Amaga la finestra princial de tkinter
 root.lift()  # Posa la finestra emergent en primer pla
 root.attributes('-topmost', True)  # La finestra sempre al davant
-
 # Carpeta con la lista de archivos CSV y Excel a combinar
-ExpDef = filedialog.askopenfilename(title="Select ExpDef file")
-
+ExpDef = filedialog.askopenfilename(title="Select Experiments Description excel file")
 if ExpDef:
     ExpDef = ExpDef.replace("/", "\\")
-
 if LoadsDef and ExpDef and DataFolder:
 
     #Inputs definitions
     # DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/RenyunTENG/ExpResistance/" #Use /, not \
-    DataDir = DataFolder + 'RawData/'
+    DataDir = DataFolder + '\\RawData\\'
     # LoadsDef = DataFolder + 'RawData/LoadsDescription.ods' #Loads excel to use
     # ExpDef = DataFolder + 'RawData/Experiments.ods' #Excel name to use
-    TribuId = "'SwTENG-R'" #TribuID selection from excel name
+    TribuId = "'PI2525Au-R'" #TribuID selection from excel name
 
     # Output Definitions
     # Creates a PDF in Reports folder with the name LoadReports-ExpDef(previously specified)
-    PDF = PdfPages(DataFolder + 'Reports/LoadReport-{}.pdf'.format(ExpDef.split('/')[-1].split('.')[0]))
-    OutFile = DataFolder + 'DataSets/Cycles-{}.pkl'.format(ExpDef.split('/')[-1].split('.')[0])
+    PDF = PdfPages(DataFolder + '\\Reports\\LoadReport-{}.pdf'.format(ExpDef.split('/')[-1].split('.')[0]))
+    OutFile = DataFolder + '\\DataSets\\Cycles-{}.pkl'.format(ExpDef.split('/')[-1].split('.')[0])
 
     # %% Read Experiments Excel
     dfExp = pd.read_excel(ExpDef)
