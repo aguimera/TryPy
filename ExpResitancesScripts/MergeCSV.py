@@ -3,6 +3,9 @@ import os
 import numpy as np
 import re
 import matplotlib.pyplot as plt
+# Merge CSV and xlsx into a single file named DAQ and motor
+# Save the file names into Experiments excels
+# Go to LoadExperiments and load excels of experiment metadata containing merged file names
 
 def LTIME_to_seconds(LTIME):
     

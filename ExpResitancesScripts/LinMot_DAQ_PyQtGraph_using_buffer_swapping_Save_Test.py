@@ -13,6 +13,16 @@ from tkinter import filedialog
 import os
 from RaspberryInterface import RaspberryInterface
 
+# Before run, 1st Turn on Motor(plugged in and firmware)
+# 2nd Turn on Raspberry(pulgged in)
+# Connects with Raspberry and DAQ
+# Asks you to start recording and where.
+# Starts recording simultaneously DAQ and Motor
+# Saves all data in folder you specify
+# Deletes Raspberry files after downloading in pc
+# Go to MergeCSV to merge files of a single experiment
+
+
 # ---------------- CONFIG ----------------
 CHANNEL = "Dev1/ai0"
 SAMPLE_RATE = 1000
