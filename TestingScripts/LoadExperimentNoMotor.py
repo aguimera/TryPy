@@ -56,12 +56,13 @@ if DaqFile:
         all_pos_peaks, _ = find_peaks(signal,distance=35)
         # Keep only those with strictly positive values
         positive_peaks = all_pos_peaks[signal[all_pos_peaks] > 0.026]
+        mediaPos = signal[positive_peaks].mean()
 
         # --- Detect local minima (negative peaks) ---
         all_neg_peaks, _ = find_peaks(-signal,distance=80)
         # Keep only those with strictly negative values
         negative_peaks = all_neg_peaks[signal[all_neg_peaks] < -0.0772]
-
+        mediaNeg = signal[negative_peaks].mean()
         # --- Add results to DataFrame ---
         dfDAQ['PositivePeak'] = False
         dfDAQ.loc[positive_peaks, 'PositivePeak'] = True
@@ -76,6 +77,7 @@ if DaqFile:
     plt.legend()
     plt.grid(True)
     plt.show()
+
     plt.figure(figsize=(12, 6))
     plt.plot(time, signal, label='Voltage')
     plt.plot(time[positive_peaks], signal[positive_peaks], 'go', label='Positive Peaks')
@@ -85,6 +87,23 @@ if DaqFile:
     plt.ylabel('Voltage(V)')
     plt.legend()
     plt.grid(True)
+    plt.show()
+
+    labels = ['Picos Positivos', 'Picos Negativos']
+    values = [mediaPos, mediaNeg]
+    colors = ['skyblue', 'salmon']
+    plt.figure(figsize=(12, 6))
+    bars=plt.bar(labels, values, color=colors)
+    # Agregar valores encima de cada barra
+    for bar in bars:
+        yval = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width() / 2, yval + 0.2 * (1 if yval >= 0 else -1),
+                 f'{yval:.2f}', ha='center', va='bottom' if yval >= 0 else 'top')
+    # Títulos y etiquetas
+    plt.title('Positive and negative peaks mean', fontsize=14)
+    plt.ylabel('Voltaje [V]', fontsize=12)
+    plt.grid(axis='y', linestyle='--', alpha=0.5)
+    plt.tight_layout()
     plt.show()
 
 else:
