@@ -53,17 +53,17 @@ if ExpDef:
     ExpDef = ExpDef.replace("/", "\\")
 if LoadsDef and ExpDef and DataFolder:
 
-    #Inputs definitions
-    # DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/RenyunTENG/ExpResistance/" #Use /, not \
+    ### Inputs definitions
+    # DataFolder = "S:/TriboMedData/CharacterizationData/TENGData/RenyunTENG/ExpResistance/" #Use \\, not /
     DataDir = DataFolder + '\\RawData\\'
     # LoadsDef = DataFolder + 'RawData/LoadsDescription.ods' #Loads excel to use
     # ExpDef = DataFolder + 'RawData/Experiments.ods' #Excel name to use
-    TribuId = "'PI2525Au-R'" #TribuID selection from excel name
+    TribuId = "'PI2525Au'" #TribuID selection from excel name
 
     # Output Definitions
     # Creates a PDF in Reports folder with the name LoadReports-ExpDef(previously specified)
-    PDF = PdfPages(DataFolder + '\\Reports\\LoadReport-{}.pdf'.format(ExpDef.split('/')[-1].split('.')[0]))
-    OutFile = DataFolder + '\\DataSets\\Cycles-{}.pkl'.format(ExpDef.split('/')[-1].split('.')[0])
+    PDF = PdfPages(DataFolder + '\\Reports\\LoadReport-{}.pdf'.format(ExpDef.split('\\')[-1].split('.')[0]))
+    OutFile = DataFolder + '\\DataSets\\Cycles-{}.pkl'.format(ExpDef.split('\\')[-1].split('.')[0])
 
     # %% Read Experiments Excel
     dfExp = pd.read_excel(ExpDef)
@@ -90,6 +90,7 @@ if LoadsDef and ExpDef and DataFolder:
                     dfExps.loc[index, lf] = 1
                 # elif lf== 'Ceq':
                 #     dfExps.loc[index, lf] = float('inf')
+    
         else:
             print(f'Warning Load {r.RloadId} not found !!!! (Assigned ∞)')
             for lf in LoadsFields:
@@ -116,6 +117,8 @@ if LoadsDef and ExpDef and DataFolder:
             print(f'File {motorFile} not found')
             dfExps.drop(index, inplace=True)
             print("Experiment {} Deleted".format(r.ExpId))
+            #TO DO: Include the option of plotting the voltage vs time, current calculation, power calculation,
+            # cycles detection, and further analysis
 
     # %% DATA PROCESSING
     plt.ioff()
