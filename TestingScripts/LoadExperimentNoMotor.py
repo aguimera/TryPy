@@ -32,6 +32,8 @@ root.lift()  # Posa la finestra emergent en primer pla
 root.attributes('-topmost', True)  # La finestra sempre al davant
 # Carpeta con la lista de archivos CSV y Excel a combinar
 DaqFile = filedialog.askopenfilename(title="Select Raw Data File")
+
+
 if DaqFile:
 
     # %% Enter  raw data file
@@ -41,37 +43,48 @@ if DaqFile:
         dfDAQ = tdms_file.as_dataframe(time_index=True,
                                    scaled_data=False) #create data frame of the file imported
         dfDAQ.reset_index(inplace=True)
-
         # Optionally rename columns
         dfDAQ = dfDAQ.set_axis(['Time', 'Voltage'], axis=1)
         if 'DQAColumnRenames' in globals():
             dfDAQ = dfDAQ.rename(columns=DQAColumnRenames)
 
-        # %% DATA processing
+    # %% Enter  Resistance info
+    resistance=100000000 #100 MoHm
 
-        # Extract signal and time variables
-        signal = dfDAQ['Voltage'].values
-        time = dfDAQ['Time'].values
+    # %% DATA processing
 
-        # Detect local maxima (positive peaks)
-        all_pos_peaks, _ = find_peaks(signal,distance=35)
-        # Keep only those larger than a manual positive limit
-        positive_peaks = all_pos_peaks[signal[all_pos_peaks] > 0.026]
-        #Calculate statistics
-        mediaPos = signal[positive_peaks].mean()
+    # Extract signal and time variables
+    signal = dfDAQ['Voltage'].values
+    time = dfDAQ['Time'].values
 
-        #Detect local minima (negative peaks)
-        all_neg_peaks, _ = find_peaks(-signal,distance=80)
-        # Keep only those lower than a manual negative limit
-        negative_peaks = all_neg_peaks[signal[all_neg_peaks] < -0.0772]
-        # Calculate statistics
-        mediaNeg = signal[negative_peaks].mean()
+    # Detect local maxima (positive peaks)
+    all_pos_peaks, _ = find_peaks(signal,distance=35)
+    # Keep only those larger than a manual positive limit
+    positive_peaks = all_pos_peaks[signal[all_pos_peaks] > 0.026]
+    #Calculate statistics
+    mediaPos = signal[positive_peaks].mean()
 
-        #Add results to DataFrame
-        dfDAQ['PositivePeak'] = False
-        dfDAQ.loc[positive_peaks, 'PositivePeak'] = True
-        dfDAQ['NegativePeak'] = False
-        dfDAQ.loc[negative_peaks, 'NegativePeak'] = True
+    #D etect local minima (negative peaks)
+    all_neg_peaks, _ = find_peaks(-signal,distance=80)
+    # Keep only those lower than a manual negative limit
+    negative_peaks = all_neg_peaks[signal[all_neg_peaks] < -0.0772]
+    # Calculate statistics
+    mediaNeg = signal[negative_peaks].mean()
+
+    # Pulse width calculations
+    Energy calculation
+    #Power Calculations
+    Power = dfDAQ.Voltage**2 / resistance
+    E = np.sum(Power) * dt
+
+    #Add results to DataFrame
+    dfDAQ['PositivePeak'] = False
+    dfDAQ.loc[positive_peaks, 'PositivePeak'] = True
+    dfDAQ['NegativePeak'] = False
+    dfDAQ.loc[negative_peaks, 'NegativePeak'] = True
+    # Power Calculation
+
+
 
     # %% DATA plotting
     #Raw Data Plot
