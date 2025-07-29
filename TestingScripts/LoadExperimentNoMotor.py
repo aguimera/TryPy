@@ -15,13 +15,17 @@ mpl.use("Qt5Agg")  #backend es la herramienta de visor de graficas
 plt.close('all')  #cerrar todas las graficas antes de empezar
 plt.ion()  #activar las graficas que se vean y que no se escondan
 
-DQAColumnRenames = {
-    'Input 0': 'Voltage',
-    'Unnamed: 1': 'Time',
-    'Original Data': 'Voltage DC',
-    'AC Signal': 'Voltage with Trend',
-    'AC with Trend': 'Voltage',
+DAQColumnRenames = {
+    # 'Input 0': 'Voltage',
+     'Unnamed: 1': 'Time',
+    # 'Original Data': 'Voltage DC',
+    # 'AC Signal': 'Voltage with Trend',
+    # 'AC with Trend': 'Voltage',
+    'Voltage': 'Voltage',
+    'Current': 'Current'
 }
+
+
 
 
 # %% Definition of folders path and files names to use
@@ -44,9 +48,11 @@ if DaqFile:
                                    scaled_data=False) #create data frame of the file imported
         dfDAQ.reset_index(inplace=True)
         # Optionally rename columns
-        dfDAQ = dfDAQ.set_axis(['Time', 'Voltage'], axis=1)
-        if 'DQAColumnRenames' in globals():
-            dfDAQ = dfDAQ.rename(columns=DQAColumnRenames)
+        dfDAQ = dfDAQ.set_axis(DAQColumnRenames, axis=1)
+        if 'DAQColumnRenames' in globals():
+            dfDAQ = dfDAQ.rename(columns=DAQColumnRenames)
+
+
 
     # %% Enter  Resistance info
     resistance=100000000 #100 MoHm
@@ -55,6 +61,8 @@ if DaqFile:
 
     # Extract signal and time variables
     signal = dfDAQ['Voltage'].values
+    signalI=dfDAQ['Current'].values
+    signalCurrent=signalI/499000
     time = dfDAQ['Time'].values
 
     # Detect local maxima (positive peaks)
@@ -64,7 +72,7 @@ if DaqFile:
     #Calculate statistics
     mediaPos = signal[positive_peaks].mean()
 
-    #D etect local minima (negative peaks)
+    #Detect local minima (negative peaks)
     all_neg_peaks, _ = find_peaks(-signal,distance=80)
     # Keep only those lower than a manual negative limit
     negative_peaks = all_neg_peaks[signal[all_neg_peaks] < -0.0772]
@@ -72,17 +80,17 @@ if DaqFile:
     mediaNeg = signal[negative_peaks].mean()
 
     # Pulse width calculations
-    Energy calculation
+    #Energy calculation
     #Power Calculations
     Power = dfDAQ.Voltage**2 / resistance
-    E = np.sum(Power) * dt
+    #E = np.sum(Power) * dt
 
     #Add results to DataFrame
     dfDAQ['PositivePeak'] = False
     dfDAQ.loc[positive_peaks, 'PositivePeak'] = True
     dfDAQ['NegativePeak'] = False
     dfDAQ.loc[negative_peaks, 'NegativePeak'] = True
-    # Power Calculation
+
 
 
 
@@ -90,9 +98,18 @@ if DaqFile:
     #Raw Data Plot
     plt.figure(figsize=(12, 6))
     plt.plot(time, signal, label='Voltage')
-    plt.title('Raw Signal')
+    plt.title('Raw Voltage')
     plt.xlabel('Time(s)')
     plt.ylabel('Voltage(V)')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    plt.figure(figsize=(12, 6))
+    plt.plot(time, signalCurrent, label='Current')
+    plt.title('Raw Current')
+    plt.xlabel('Time(s)')
+    plt.ylabel('Current(A)')
     plt.legend()
     plt.grid(True)
     plt.show()
