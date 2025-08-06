@@ -49,7 +49,7 @@ if DataFolder and ExpDef and FileIn:
     # %% Load data
     #DataFolder = 'S:/TriboMedData/CharacterizationData/TENGData/RenyunTENG/ExpResistance/'
     #ExpDef = DataFolder + 'RawData/Experiments.ods' #Excel name to use
-    TribuId = "'SwTENG-R'"
+    TribuId = "'PI2611-Au'"
 
     #Takes the pkl generated in LoadExperiments and process it
     #FileIn = DataFolder + 'DataSets/Cycles-Experiments.pkl'
@@ -66,8 +66,8 @@ if DataFolder and ExpDef and FileIn:
         dfData.loc[index, 'VoltageMin'] = cyData.Voltage.min()
         dfData.loc[index, 'Energy'] = simpson(y=cyData.Power, x=cyData.Time)
         IndHalf = int(r.iTransition)
-        dfData.loc[index, 'PositiveEnergy'] = simpson(y=cyData.Power[:IndHalf], x=cyData.Time[:IndHalf])
-        dfData.loc[index, 'NegativeEnergy'] = simpson(y=cyData.Power[IndHalf:], x=cyData.Time[IndHalf:])
+        dfData.loc[index, 'PositiveSignalEnergy'] = simpson(y=cyData.Power[:IndHalf], x=cyData.Time[:IndHalf])
+        dfData.loc[index, 'NegativeSignalEnergy'] = simpson(y=cyData.Power[IndHalf:], x=cyData.Time[IndHalf:])
 
 
     # %% Plot experiments comparison
@@ -89,21 +89,21 @@ if DataFolder and ExpDef and FileIn:
     fig, ax = plt.subplots()
     sns.lineplot(data=dSel,
                  x='ExpId',
-                 y='PositiveEnergy',
+                 y='PositiveSignalEnergy',
                  ax=ax,
-                 color= 'black',
-                 label='PositiveEnergy')
+                 color= 'red',
+                 label='PositiveSignalEnergy')
     sns.lineplot(data=dSel,
                  x='ExpId',
-                 y='NegativeEnergy',
+                 y='NegativeSignalEnergy',
                  ax=ax,
-                 color=(0.5, 0.5, 0.5), #dark gray colour
-                 label='NegativeEnergy')
+                 color= 'blue',   #(0.5, 0.5, 0.5) #dark gray colour
+                 label='NegativeSignalEnergy')
     sns.lineplot(data=dSel,
                  x='ExpId',
                  y='Energy',
                  ax=ax,
-                 color=(0.8, 0.8, 0.8),  # Medium gray color
+                 color='green',  #(0.8, 0.8, 0.8),# Medium gray color
                  label='Energy')
     # ax.set_xscale('log')
     # ax.set_yscale('log')
@@ -121,8 +121,8 @@ if DataFolder and ExpDef and FileIn:
     fig, ax = plt.subplots(figsize=(10, 6))
     fig.suptitle('Energy Variability')
     # Trazar los puntos para PosEnergy, NegEnergy y Energy en función de Req
-    sns.scatterplot(data=dfData, x='ExpId', y='PositiveEnergy', ax=ax, label='PosEnergy', color='blue')
-    sns.scatterplot(data=dfData, x='ExpId', y='NegativeEnergy', ax=ax, label='NegEnergy', color='red')
+    sns.scatterplot(data=dfData, x='ExpId', y='PositiveSignalEnergy', ax=ax, label='PositiveSignalEnergy', color='blue')
+    sns.scatterplot(data=dfData, x='ExpId', y='NegativeSignalEnergy', ax=ax, label='NegativeSignalEnergy', color='red')
     sns.scatterplot(data=dfData, x='ExpId', y='Energy', ax=ax, label='Energy', color='green')
     ax.set_xlabel('ExpId')
     ax.set_ylabel('Energy (J)')

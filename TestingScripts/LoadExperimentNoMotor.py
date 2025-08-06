@@ -68,7 +68,7 @@ if DaqFile:
     # Detect local maxima (positive peaks)
     all_pos_peaks, _ = find_peaks(signal,distance=35)
     # Keep only those larger than a manual positive limit
-    positive_peaks = all_pos_peaks[signal[all_pos_peaks] > 0.026]
+    positive_peaks = all_pos_peaks[signal[all_pos_peaks] > 0.25]
     #Calculate statistics
     mediaPos = signal[positive_peaks].mean()
 

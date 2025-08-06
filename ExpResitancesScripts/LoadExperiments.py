@@ -58,7 +58,7 @@ if LoadsDef and ExpDef and DataFolder:
     DataDir = DataFolder + '\\RawData\\'
     # LoadsDef = DataFolder + 'RawData/LoadsDescription.ods' #Loads excel to use
     # ExpDef = DataFolder + 'RawData/Experiments.ods' #Excel name to use
-    TribuId = "'PI2525Au'" #TribuID selection from excel name
+    TribuId = "'PI2611-Au'" #TribuID selection from excel name
 
     # Output Definitions
     # Creates a PDF in Reports folder with the name LoadReports-ExpDef(previously specified)
