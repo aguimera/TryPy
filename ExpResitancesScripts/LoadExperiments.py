@@ -176,10 +176,10 @@ if LoadsDef and ExpDef and DataFolder:
                 ptdata = dfData[var]
             ax.plot(dfData[XVar], ptdata, **VarColors[var]['LineKwarg']) # Plotea cada columna
 
-        #for index, r in dfCycle.iterrows():    # Generates yellow separation lines to start, end of the cycles
-        #    ax.axvline(x=r.tStart, color='y', linewidth=0.5)
-        #    ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=0.5)
-        #    ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=0.5)
+        for index, r in dfCycle.iterrows():    # Generates yellow separation lines to start, end of the cycles
+           ax.axvline(x=r.tStart, color='y', linewidth=0.5)
+           ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=0.5)
+           ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=0.5)
 
         fig = ax.get_figure()
         fig.suptitle(r.ExpId)
