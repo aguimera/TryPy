@@ -8,7 +8,7 @@ import matplotlib as mpl
 from matplotlib.backends.backend_pdf import PdfPages  # importar libreria para hacer pdfs
 from scipy.signal import peak_widths
 from operator import concat
-
+from scipy.integrate import simpson
 # Archivos que seran Exportable. Importo las librerias que anton ha creado para el proyecto.
 from TryPy.Calculations import ExtractCyclesByPos, FindTransitionTime
 from TryPy.LoadData import LoadDAQFile
@@ -105,16 +105,22 @@ if LoadsDef and ExpDef and DataFolder:
     dfDAQ=pd.DataFrame()
     dfData=pd.DataFrame()
     dfPower=pd.DataFrame()
+    dfEnergy=pd.DataFrame()
     for index, r in dfExps.iterrows():  # Para cada fila del último dfExps
         print(f'Processing: {r.ExpId}')
         col_name = f"Voltage_{r.Req}"
         col_name_P = f"Power_{r.Req}"
+        col_name_E = f"Energy_{r.Req}"
         # Creates DataFrame with DAQ(V,I,P)
         dfDAQ=LoadDAQFile(r.DaqFile)
         dfData['Time'] = dfDAQ.Time  # Extracts Time Column
         dfData[col_name] = dfDAQ.Voltage # Extracts all voltage column for each R
+        #Calculates Power per each Voltage
         for col in dfData.columns[1:]:
             dfPower[col_name_P]=dfData[col]**2/r.Req
+        #Calculates Energy per each Power
+        dfEnergy[col_name_E] = [simpson(y=dfPower[col_name_P], x=dfData['Time'])]
+
         # DAQ sampling rate
         if 'Time' in dfDAQ.columns:
             nSampsDAQ = dfDAQ.Voltage.size
