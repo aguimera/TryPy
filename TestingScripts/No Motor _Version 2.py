@@ -128,3 +128,46 @@ if LoadsDef and ExpDef and DataFolder:
             DaqFs = 1 / dt  # in Hz
             print(f'Found DAQ sampling rate: {DaqFs}')
 
+
+     # %% DATA plotting
+        # Voltage PLOTS
+        for col in dfData.columns[1:]:
+            plt.figure(figsize=(12, 6))
+            plt.plot(dfData.Time, col, label='Voltage')
+            plt.title(f"Voltage_{r.Req}")
+            plt.xlabel('Time(s)')
+            plt.ylabel('Voltage(V)')
+            plt.legend()
+            plt.grid(True)
+            plt.show()
+
+        # Power PLOTS
+        for col in dfPower.columns:
+            plt.figure(figsize=(12, 6))
+            plt.plot(dfData.Time, col, label='Power')
+            plt.title(f"Power_{r.Req}")
+            plt.xlabel('Time(s)')
+            plt.ylabel('Power(W)')
+            plt.legend()
+            plt.grid(True)
+            plt.show()
+
+        for col in dfEnergy.columns:
+            plt.figure(figsize=(12, 6))
+            plt.plot(r.Req, col, label='Power')
+            plt.title(f"Power_{r.Req}")
+            plt.xlabel('Time(s)')
+            plt.ylabel('Power(W)')
+            plt.legend()
+            plt.grid(True)
+            plt.show()
+
+
+
+
+
+
+
+
+else:
+    print("File Selection Canceled")

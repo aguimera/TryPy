@@ -16,13 +16,13 @@ plt.close('all')  #cerrar todas las graficas antes de empezar
 plt.ion()  #activar las graficas que se vean y que no se escondan
 
 DAQColumnRenames = {
-    # 'Input 0': 'Voltage',
-     'Unnamed: 1': 'Time',
-    # 'Original Data': 'Voltage DC',
-    # 'AC Signal': 'Voltage with Trend',
-    # 'AC with Trend': 'Voltage',
-    'Voltage': 'Voltage',
-    'Current': 'Current'
+    'Input 0': 'Voltage'
+    #  'Unnamed: 1': 'Time',
+    # # 'Original Data': 'Voltage DC',
+    # # 'AC Signal': 'Voltage with Trend',
+    # # 'AC with Trend': 'Voltage',
+    # 'Voltage': 'Voltage',
+    # 'Current': 'Current'
 }
 
 
@@ -48,9 +48,9 @@ if DaqFile:
                                    scaled_data=False) #create data frame of the file imported
         dfDAQ.reset_index(inplace=True)
         # Optionally rename columns
-        dfDAQ = dfDAQ.set_axis(DAQColumnRenames, axis=1)
         if 'DAQColumnRenames' in globals():
             dfDAQ = dfDAQ.rename(columns=DAQColumnRenames)
+            dfDAQ = dfDAQ.set_axis(['Time', 'Voltage'], axis=1)
 
 
 
@@ -60,9 +60,13 @@ if DaqFile:
     # %% DATA processing
 
     # Extract signal and time variables
+
     signal = dfDAQ['Voltage'].values
-    signalI=dfDAQ['Current'].values
-    signalCurrent=signalI/499000
+    if 'Current' in dfDAQ:
+        signalI= dfDAQ['Current'].values
+        signalCurrent=signalI/499000
+    else:
+        print('No current loaded')
     time = dfDAQ['Time'].values
 
     # Detect local maxima (positive peaks)
@@ -105,14 +109,14 @@ if DaqFile:
     plt.grid(True)
     plt.show()
 
-    plt.figure(figsize=(12, 6))
-    plt.plot(time, signalCurrent, label='Current')
-    plt.title('Raw Current')
-    plt.xlabel('Time(s)')
-    plt.ylabel('Current(A)')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+    # plt.figure(figsize=(12, 6))
+    # plt.plot(time, signalCurrent, label='Current')
+    # plt.title('Raw Current')
+    # plt.xlabel('Time(s)')
+    # plt.ylabel('Current(A)')
+    # plt.legend()
+    # plt.grid(True)
+    # plt.show()
 
     #Peaks detection plot
     plt.figure(figsize=(12, 6))
