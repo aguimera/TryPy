@@ -111,15 +111,21 @@ if LoadsDef and ExpDef and DataFolder:
         col_name = f"Voltage_{r.Req}"
         col_name_P = f"Power_{r.Req}"
         col_name_E = f"Energy_{r.Req}"
-        # Creates DataFrame with DAQ(V,I,P)
+        # Read DAQ fILE
         dfDAQ=LoadDAQFile(r.DaqFile)
         dfData['Time'] = dfDAQ.Time  # Extracts Time Column
         dfData[col_name] = dfDAQ.Voltage # Extracts all voltage column for each R
-        #Calculates Power per each Voltage
-        for col in dfData.columns[1:]:
-            dfPower[col_name_P]=dfData[col]**2/r.Req
+        dfPower[col_name_P] = dfData[col_name]**2 / r.Req #Calculates Power per each Voltage
+
         #Calculates Energy per each Power
-        dfEnergy[col_name_E] = [simpson(y=dfPower[col_name_P], x=dfData['Time'])]
+        #if len(dfPower[col_name_P]) == len(dfDAQ.Time):
+        # Elimina el último valor (posible NaN) para simpson
+        # power_series = dfPower[col_name_P].iloc[:-1]
+        # time_series = dfDAQ.Time.iloc[:-1]
+        # dfEnergy.loc[0, col_name_E] = simpson(y=power_series, x=dfDAQ.Time )
+        dfEnergy.loc[0, col_name_E] = simpson(y=dfPower[col_name_P], x=dfDAQ.Time)
+        # else:
+        #     print(f"Length mismatch in {col_name_E}: Power={len(dfPower[col_name_P])}, Time={len(dfDAQ.Time)}")
 
         # DAQ sampling rate
         if 'Time' in dfDAQ.columns:
@@ -130,44 +136,36 @@ if LoadsDef and ExpDef and DataFolder:
 
 
      # %% DATA plotting
-        # Voltage PLOTS
-        for col in dfData.columns[1:]:
-            plt.figure(figsize=(12, 6))
-            plt.plot(dfData.Time, col, label='Voltage')
-            plt.title(f"Voltage_{r.Req}")
-            plt.xlabel('Time(s)')
-            plt.ylabel('Voltage(V)')
-            plt.legend()
-            plt.grid(True)
-            plt.show()
-
-        # Power PLOTS
-        for col in dfPower.columns:
-            plt.figure(figsize=(12, 6))
-            plt.plot(dfData.Time, col, label='Power')
-            plt.title(f"Power_{r.Req}")
-            plt.xlabel('Time(s)')
-            plt.ylabel('Power(W)')
-            plt.legend()
-            plt.grid(True)
-            plt.show()
-
-        for col in dfEnergy.columns:
-            plt.figure(figsize=(12, 6))
-            plt.plot(r.Req, col, label='Power')
-            plt.title(f"Power_{r.Req}")
-            plt.xlabel('Time(s)')
-            plt.ylabel('Power(W)')
-            plt.legend()
-            plt.grid(True)
-            plt.show()
-
-
-
-
-
-
-
-
+     #    # Voltage PLOTS
+     #    for col in dfData.columns[1:]:
+     #        plt.figure(figsize=(12, 6))
+     #        plt.plot(dfData.Time, dfData[col], label='Voltage')
+     #        plt.title(f"Voltage_{r.Req}")
+     #        plt.xlabel('Time(s)')
+     #        plt.ylabel('Voltage(V)')
+     #        plt.legend()
+     #        plt.grid(True)
+     #        plt.show()
+     #
+     #    # Power PLOTS
+     #    for col in dfPower.columns:
+     #        plt.figure(figsize=(12, 6))
+     #        plt.plot(dfData.Time, dfPower[col], label='Power')
+     #        plt.title(f"Power_{r.Req}")
+     #        plt.xlabel('Time(s)')
+     #        plt.ylabel('Power(W)')
+     #        plt.legend()
+     #        plt.grid(True)
+     #        plt.show()
+     #
+     #    for col in dfEnergy.columns:
+     #        plt.figure(figsize=(12, 6))
+     #        plt.plot(r.Req, dfEnergy[col], label='Power')
+     #        plt.title(f"Power_{r.Req}")
+     #        plt.xlabel('Time(s)')
+     #        plt.ylabel('Power(W)')
+     #        plt.legend()
+     #        plt.grid(True)
+     #        plt.show()
 else:
     print("File Selection Canceled")
