@@ -35,13 +35,13 @@ VarColors = {
                  'Label': 'Position [mm]'
                  },
 
-    # 'Force': {'LineKwarg': {'color': 'g',
-    #                         'linestyle': 'dashed',
-    #                         'linewidth': 0.5,
-    #                        },
-    #           # 'Limits': (-5, 5),
-    #          'Label': 'Force [N]'
-    #           },
+     'Force': {'LineKwarg': {'color': 'g',
+                             'linestyle': 'dashed',
+                             'linewidth': 0.5,
+                            },
+               # 'Limits': (-5, 5),
+              'Label': 'Force [N]'
+               },
     # 'Acceleration': {'LineKwarg': {'color': 'orange',
     #                                'linestyle': 'dashed',
     #                               'linewidth': 0.5,
