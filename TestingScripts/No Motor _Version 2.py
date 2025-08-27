@@ -3,12 +3,18 @@
 import numpy as np  # importa la libreria numpy con el nombre np. Analisis matricial y matematica, tipo matlab
 import pandas as pd  # importa la libreria pandas con el nombre pd. Manejo de tablas de datos, tipo excel.
 import os
+import sys
 import matplotlib.pyplot as plt  # importa la libreria de graficas
 import matplotlib as mpl
 from matplotlib.backends.backend_pdf import PdfPages  # importar libreria para hacer pdfs
 from scipy.signal import peak_widths
 from operator import concat
 from scipy.integrate import simpson
+
+# Add project root to Python path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(project_root)
+
 # Archivos que seran Exportable. Importo las librerias que anton ha creado para el proyecto.
 from TryPy.Calculations import ExtractCyclesByPos, FindTransitionTime
 from TryPy.LoadData import LoadDAQFile
@@ -20,6 +26,25 @@ from tkinter import filedialog
 mpl.use("Qt5Agg")  # backend es la herramienta de visor de graficas
 plt.close('all')  # cerrar todas las graficas antes de empezar
 plt.ion()  # activar las graficas que se vean y que no se escondan
+
+def calculate_energy(power_series, time_series):
+    """
+    Calculate energy by integrating power over time using trapezoidal method
+    power_series: array of power values in watts
+    time_series: array of time values in seconds
+    returns: energy in joules
+    """
+    # Ensure both arrays have the same length by removing last few samples
+    min_length = min(len(power_series), len(time_series))  # Remove extra 5 samples for safety
+    power_series = power_series[:min_length]
+    time_series = time_series[:min_length]
+    
+    # Calculate time differences between consecutive samples
+    dt = np.diff(time_series)
+    # Calculate average power between consecutive samples
+    avg_power = (power_series[:-1] + power_series[1:]) / 2
+    # Multiply and sum to get total energy
+    return np.sum(avg_power * dt)
 
 # %% Definition of folders path and files names to use
 print("Please provide a folder location")
@@ -55,7 +80,7 @@ if LoadsDef and ExpDef and DataFolder:
 
     ### Inputs definitions
     DataDir = DataFolder + '\\RawData\\'
-    TribuId = "'PI2611-Au'"  # TribuID selection from excel name
+    TribuId = "'Nylon6-PI5878G'"  # TribuID selection from excel name
 
     # Output Definitions
     # Creates a PDF in Reports folder with the name LoadReports-ExpDef(previously specified)
@@ -106,6 +131,11 @@ if LoadsDef and ExpDef and DataFolder:
     dfData=pd.DataFrame()
     dfPower=pd.DataFrame()
     dfEnergy=pd.DataFrame()
+    
+    # Lists to store resistance and energy values for plotting
+    resistances = []
+    energies = []
+    
     for index, r in dfExps.iterrows():  # Para cada fila del último dfExps
         print(f'Processing: {r.ExpId}')
         col_name = f"Voltage_{r.Req}"
@@ -117,15 +147,15 @@ if LoadsDef and ExpDef and DataFolder:
         dfData[col_name] = dfDAQ.Voltage # Extracts all voltage column for each R
         dfPower[col_name_P] = dfData[col_name]**2 / r.Req #Calculates Power per each Voltage
 
-        #Calculates Energy per each Power
-        #if len(dfPower[col_name_P]) == len(dfDAQ.Time):
-        # Elimina el último valor (posible NaN) para simpson
-        # power_series = dfPower[col_name_P].iloc[:-1]
-        # time_series = dfDAQ.Time.iloc[:-1]
-        # dfEnergy.loc[0, col_name_E] = simpson(y=power_series, x=dfDAQ.Time )
-        dfEnergy.loc[0, col_name_E] = simpson(y=dfPower[col_name_P], x=dfDAQ.Time)
-        # else:
-        #     print(f"Length mismatch in {col_name_E}: Power={len(dfPower[col_name_P])}, Time={len(dfDAQ.Time)}")
+        # Calculate energy using our custom function
+        dfEnergy.loc[0, col_name_E] = calculate_energy(
+            dfPower[col_name_P].values,
+            dfDAQ.Time.values
+        )
+        
+        # Store values for plotting
+        resistances.append(r.Req)
+        energies.append(dfEnergy.loc[0, col_name_E])
 
         # DAQ sampling rate
         if 'Time' in dfDAQ.columns:
@@ -134,6 +164,20 @@ if LoadsDef and ExpDef and DataFolder:
             DaqFs = 1 / dt  # in Hz
             print(f'Found DAQ sampling rate: {DaqFs}')
 
+    # Create energy vs resistance plot
+    plt.figure(figsize=(10, 6))
+    plt.plot(resistances, energies, 'bo-', linewidth=2, markersize=8)
+    plt.xscale('log')  # Log scale for resistance
+    plt.grid(True)
+    plt.xlabel('Resistance (Ω)')
+    plt.ylabel('Energy (J)')
+    plt.title('Energy vs Load Resistance')
+    
+    # Generate timestamp and save plot with timestamp in Reports folder
+    timestamp = pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')
+    plot_filename = os.path.join(DataFolder, 'Reports', f'energy_vs_resistance_{timestamp}.png')
+    plt.savefig(plot_filename)
+    plt.close()
 
      # %% DATA plotting
      #    # Voltage PLOTS

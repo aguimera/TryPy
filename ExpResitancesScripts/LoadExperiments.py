@@ -54,11 +54,11 @@ plt.ion()  #activar las graficas que se vean y que no se escondan
 # if LoadsDef and ExpDef and DataFolder:
 
 ### Inputs definitions
-DataFolder = "S:\\TriboMedData\\CharacterizationData\\TENGData\\06-08-2025 SetUp Tests New Clips\\" #Use \\, not /
+DataFolder = "C:\\Users\\mmartic\\Desktop\\22-08-2025 Test Motor Reproducibility\\" #Use \\, not /
 DataDir = DataFolder + '\\RawData\\'
 LoadsDef = DataFolder + 'RawData\\LoadsDescription.ods' #Loads excel to use
 ExpDef = DataFolder + 'RawData\\Experiments.ods' #Excel name to use
-TribuId = "'PI2611-Au'" #TribuID selection from excel name
+TribuId = "'PI2525-Nylon6-Reversed'" #TribuID selection from excel name
 
 # Output Definitions
 # Creates a PDF in Reports folder with the name LoadReports-ExpDef(previously specified)
@@ -176,10 +176,10 @@ for index, r in dfExps.iterrows(): #Para cada fila del último dfExps
             ptdata = dfData[var]
         ax.plot(dfData[XVar], ptdata, **VarColors[var]['LineKwarg']) # Plotea cada columna
 
-    for index, r in dfCycle.iterrows():    # Generates yellow separation lines to start, end of the cycles
-       ax.axvline(x=r.tStart, color='y', linewidth=0.5)
-       ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=0.5)
-       ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=0.5)
+    #for index, r in dfCycle.iterrows():    # Generates yellow separation lines to start, end of the cycles
+    #   ax.axvline(x=r.tStart, color='y', linewidth=0.5)
+    #   ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=0.5)
+    #  ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=0.5)
 
     fig = ax.get_figure()
     fig.suptitle(r.ExpId)

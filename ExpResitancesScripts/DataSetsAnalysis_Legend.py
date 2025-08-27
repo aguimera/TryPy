@@ -47,9 +47,9 @@ from tkinter import filedialog
 # if DataFolder and ExpDef and FileIn:
 
 # %% Load data
-DataFolder = "S:\\TriboMedData\\CharacterizationData\\TENGData\\06-08-2025 SetUp Tests New Clips\\"
+DataFolder = "C:\\Users\\mmartic\\Desktop\\22-08-2025 Test Motor Reproducibility\\"
 ExpDef = DataFolder + 'RawData\\Experiments.ods' #Excel name to use
-TribuId = "'Nylon6-PI2525'"
+TribuId = "'PI2525-Nylon6-Reversed'"
 
 #Takes the pkl generated in LoadExperiments and process it
 FileIn = DataFolder + 'DataSets/Cycles-Experiments.pkl'
@@ -182,13 +182,13 @@ VarColors = {
                  'Label': 'Position [mm]',
                  'LabelFontsize': 15,
                  },
-    # 'Force': {'LineKwarg': {'color': 'g',
-    #                         'linestyle': 'dashed',
-    #                         'linewidth': 0.5,
-    #                         },
-    #           # 'Limits': (-5, 5),
-    #           'Label': 'Force [N]'
-    #           },
+     'Force': {'LineKwarg': {'color': 'g',
+                             'linestyle': 'dashed',
+                             'linewidth': 0.5,
+                             },
+               # 'Limits': (-5, 5),
+               'Label': 'Force [N]'
+               },
     # 'Acceleration': {'LineKwarg': {'color': 'orange',
     #                                'linestyle': 'dashed',
     #                                'linewidth': 0.5,
