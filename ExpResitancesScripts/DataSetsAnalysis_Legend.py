@@ -47,9 +47,9 @@ from tkinter import filedialog
 # if DataFolder and ExpDef and FileIn:
 
 # %% Load data
-DataFolder = "C:\\Users\\mmartic\\Desktop\\22-08-2025 Test Motor Reproducibility\\"
+DataFolder = "S:\\TriboMedData\\CharacterizationData\\TENGData\\28-08-2025 VacuumTest\\"
 ExpDef = DataFolder + 'RawData\\Experiments.ods' #Excel name to use
-TribuId = "'PI2525-Nylon6-Reversed'"
+TribuId = "'PI2525-Nylon6'"
 
 #Takes the pkl generated in LoadExperiments and process it
 FileIn = DataFolder + 'DataSets/Cycles-Experiments.pkl'
