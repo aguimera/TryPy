@@ -2,6 +2,12 @@ import os
 import numpy as np
 import pandas as pd
 from nptdms import TdmsFile
+from scipy.signal import freqs_zpk
+from scipy.fft import fft, rfft
+from scipy.fft import fftfreq, rfftfreq
+import plotly.graph_objs as go
+from plotly.subplots import make_subplots
+import matplotlib.pyplot as plt
 
 # %% Rename Raw Data columns
 MotColumnRenames = {
@@ -164,7 +170,22 @@ def Loadfiles(ExpDef):
     window_size = 9  # Tamaño de la ventana del filtro
     # dfData['SmoothVoltages'] = dfData['Voltage'].rolling(window=window_size).median()
     # dfData['SmoothVoltage'] = dfData['Voltage'].rolling(window=window_size).mean()
-    dfData['SmoothVoltage'] = dfData['Voltage'] #No hace nada, es para quitar el filtro y que funcione el código
+
+    fourier=fft((dfData['Voltage']))
+    N = len(dfData['Voltage'])
+    normalize = N / 2
+    freq_components=fftfreq(len(dfData['Voltage']),1/DaqFs)
+    norm_amplitude = np.abs(fourier)/normalize
+
+
+    plt.plot(freq_components, norm_amplitude)
+    plt.xlabel('Frequency[Hz]')
+    plt.ylabel('Amplitude')
+    plt.title('Spectrum')
+    plt.show()
+
+    dfData['SmoothVoltage'] = dfData['Voltage']  # No hace nada, es para quitar el filtro y que funcione el código
+    # Plot the results
 
     #Calcula Corriente a través de un RC
     #r.Ceq = r.Ceq / 1e6  # Pasa de microF a F
