@@ -117,7 +117,7 @@ if DaqFile:
     Power = dfDAQ.Voltage**2 / resistance
     #E = np.sum(Power) * dt
 
-    #FFT and FILTERING
+    #Parameters Definition for FILTERS
     nSampsDAQ = Signal.size
     dt = dfDAQ.Time.diff().mean()  # dt entre dos muestras de tiempo, tiempo entre muestras
     DaqFs = 1 / dt  # in Hz
@@ -125,10 +125,22 @@ if DaqFile:
     freqs = np.fft.rfftfreq(N, 1 / DaqFs) #creates the frequency bins
     cutoff = 30.0  # cutoff frequency (Hz)
     order = 4
+    Q=20
+    window = 25
+
+    # FILTERS CREATION
     b, a = butter(order, cutoff / (0.5 * DaqFs), btype='low') #low pass filter from 1 Hz
-    filtered_signal = filtfilt(b, a, Signal)
+    d, c = signal.iirnotch(cutoff, Q, DaqFs) #d numerator and c denominator of polinomial filter
+    filtered_signal_median=signal.medfilt(Signal,kernel_size=23)
+    filtered_signal_smooth= np.convolve(Signal, np.ones(window) / window, mode='same')
+
+    # FILTERS APPLICATION
+    filtered_signal_butter = filtfilt(b, a, Signal)
+    filtered_signal_notch = filtfilt(d, c, Signal)
+
+    #FFT and PSD
     fft_vals = np.fft.rfft(Signal)  # computes the FFT of the signal
-    fft_vals_filt = np.fft.rfft(filtered_signal)# computes the FFT of the Filtered signal
+    fft_vals_filt = np.fft.rfft(filtered_signal_butter)# computes the FFT of the Filtered signal
     f, Pxx = signal.welch(Signal, DaqFs, nperseg=1024)  # f = frequencies, Pxx = power density PSD
 
     #Add results to DataFrame
@@ -191,17 +203,25 @@ if DaqFile:
     plt.title("Time Domain Signal (Before Filtering)")
     plt.legend()
     plt.subplot(4, 1, 2)
-    plt.plot(time, filtered_signal, label="Filtered", alpha=0.7)
-    plt.title("Time Domain Signal (After Filtering)")
+    plt.plot(time, filtered_signal_butter, label="Filtered", alpha=0.7)
+    plt.title("Time Domain Signal (After Butter Filter)")
     plt.legend()
     plt.subplot(4, 1, 3)
-    plt.plot(freqs, np.abs(fft_vals), label="Original Spectrum")
-    plt.title("Frequency Spectrum (Before Filtering)")
-    plt.xlim(0, 100)
+    plt.plot(time, filtered_signal_notch,label="Filtered", alpha=0.7)
+    plt.title("Time Domain Signal (After 30 Hz Notch Filter)")
     plt.subplot(4, 1, 4)
-    plt.plot(freqs, np.abs(fft_vals_filt), label="Filtered Spectrum", color='orange')
-    plt.title("Frequency Spectrum (After Filtering)")
-    plt.xlim(0, 100)
+    plt.plot(time, filtered_signal_smooth, label="Filtered", color='orange')
+    plt.title("Time Domain Signal (After Smooth Filter)")
+
+
+    # plt.subplot(4, 1, 3)
+    # plt.plot(freqs, np.abs(fft_vals), label="Original Spectrum")
+    # plt.title("Frequency Spectrum (Before Filtering)")
+    # plt.xlim(0, 100)
+    # plt.subplot(4, 1, 4)
+    # plt.plot(freqs, np.abs(fft_vals_filt), label="Filtered Spectrum", color='orange')
+    # plt.title("Frequency Spectrum (After Filtering)")
+    # plt.xlim(0, 100)
     plt.tight_layout()
     plt.show()
 
