@@ -54,11 +54,11 @@ plt.ion()  #activar las graficas que se vean y que no se escondan
 # if LoadsDef and ExpDef and DataFolder:
 
 ### Inputs definitions
-DataFolder = "S:\\TriboMedData\\CharacterizationData\\TENGData\\22-08-2025 Test Motor Reproducibility\\" #Use \\, not /
+DataFolder = "C:\\Users\\mmartic\\Desktop\\29-10-2025-ExpResistanceOxidesVacuum\\" #Use \\, not /
 DataDir = DataFolder + 'RawData\\'
 LoadsDef = DataFolder + 'RawData\\LoadsDescription.ods' #Loads excel to use
 ExpDef = DataFolder + 'RawData\\Experiments.ods' #Excel name to use
-TribuId = "'2608-2525Nylon-10'" #TribuID selection from excel name
+TribuId = "'PI5878G-Nylon6'" #TribuID selection from excel name
 
 # Output Definitions
 # Creates a PDF in Reports folder with the name LoadReports-ExpDef(previously specified)

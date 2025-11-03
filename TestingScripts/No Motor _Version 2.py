@@ -80,7 +80,7 @@ if LoadsDef and ExpDef and DataFolder:
 
     ### Inputs definitions
     DataDir = DataFolder + '\\RawData\\'
-    TribuId = "'Nylon6-PI5878G'"  # TribuID selection from excel name
+    TribuId = "'PI5878G-Nylon6'"  # TribuID selection from excel name
 
     # Output Definitions
     # Creates a PDF in Reports folder with the name LoadReports-ExpDef(previously specified)
