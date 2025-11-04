@@ -48,11 +48,11 @@ from tkinter import filedialog
 
 # %% Load data
 DataFolder = "C:\\Users\\mmartic\\Desktop\\29-10-2025-ExpResistanceOxidesVacuum\\"
-ExpDef = DataFolder + 'RawData\\Experiments.ods' #Excel name to use
-TribuId = "'PI5878G-Nylon6'"
+ExpDef = DataFolder + 'RawData\\Copy of Experiments2.ods' #Excel name to use
+TribuId = "'ScratchedAuNylon6-Al2O3Au'"
 
 #Takes the pkl generated in LoadExperiments and process it
-FileIn = DataFolder + 'DataSets/Cycles-Experiments.pkl'
+FileIn = DataFolder + 'DataSets/Cycles-Copy of Experiments2.pkl'
 dfData = pd.read_pickle(FileIn)
 
 #Generate new pdf report called DataSetsAnalysis
