@@ -58,7 +58,7 @@ DataFolder = "C:\\Users\\mmartic\\Desktop\\29-10-2025-ExpResistanceOxidesVacuum\
 DataDir = DataFolder + 'RawData\\'
 LoadsDef = DataFolder + 'RawData\\LoadsDescription.ods' #Loads excel to use
 ExpDef = DataFolder + 'RawData\\Copy of Experiments2.ods' #Excel name to use
-TribuId = "'ScratchedAuNylon6-Al2O3Au'" #TribuID selection from excel name
+TribuId = "'AuSiO2PI5878G-Nylon6SiO2Au'" #TribuID selection from excel name
 
 # Output Definitions
 # Creates a PDF in Reports folder with the name LoadReports-ExpDef(previously specified)
@@ -176,10 +176,10 @@ for index, r in dfExps.iterrows(): #Para cada fila del último dfExps
             ptdata = dfData[var]
         ax.plot(dfData[XVar], ptdata, **VarColors[var]['LineKwarg']) # Plotea cada columna
 
-    #for index, r in dfCycle.iterrows():    # Generates yellow separation lines to start, end of the cycles
-    #   ax.axvline(x=r.tStart, color='y', linewidth=0.5)
-    #   ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=0.5)
-    #  ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=0.5)
+    for index, r in dfCycle.iterrows():    # Generates yellow separation lines to start, end of the cycles
+       ax.axvline(x=r.tStart, color='y', linewidth=0.5)
+       ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=0.5)
+       ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=0.5)
 
     fig = ax.get_figure()
     fig.suptitle(r.ExpId)

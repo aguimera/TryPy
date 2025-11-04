@@ -49,7 +49,7 @@ from tkinter import filedialog
 # %% Load data
 DataFolder = "C:\\Users\\mmartic\\Desktop\\29-10-2025-ExpResistanceOxidesVacuum\\"
 ExpDef = DataFolder + 'RawData\\Copy of Experiments2.ods' #Excel name to use
-TribuId = "'ScratchedAuNylon6-Al2O3Au'"
+TribuId = "'AuSiO2PI5878G-Nylon6SiO2Au'"
 
 #Takes the pkl generated in LoadExperiments and process it
 FileIn = DataFolder + 'DataSets/Cycles-Copy of Experiments2.pkl'
