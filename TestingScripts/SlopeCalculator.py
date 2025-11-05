@@ -86,7 +86,7 @@ charge_mid = Charge_float[start_idx:end_idx]
 # --- Step 2: Fit a line to that region ---
 slope, intercept, r_value, p_value, std_err = linregress(time_mid, charge_mid)
 
-print(f"Slope of the fitted line (middle region): {slope:.6f}")
+print(f"Slope of the fitted line (middle region): ", slope)
 
 # --- Step 3: Plot the data and fitted line ---
 plt.figure(figsize=(8,5))
