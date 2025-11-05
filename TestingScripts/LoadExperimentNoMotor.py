@@ -86,7 +86,7 @@ if DaqFile:
         dfDAQ = dfDAQ.rename(columns=DAQColumnRenames)
 
     # %% Enter  Resistance info
-    resistance=1000000 #1 MoHm
+    resistance=100000000 #100 MoHm
 
     # %% DATA processing
 
