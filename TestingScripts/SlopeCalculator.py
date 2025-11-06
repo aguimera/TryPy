@@ -27,7 +27,7 @@ root.lift()  # Posa la finestra emergent en primer pla
 root.attributes('-topmost', True)  # La finestra sempre al davant
 # Carpeta con la lista de archivos CSV y Excel a combinar
 DaqFile = filedialog.askopenfilename(title="Select Raw Data File")
-
+base_name = os.path.splitext(os.path.basename(DaqFile))[0]
 
 dfDAQ = pd.read_csv(DaqFile,
                             header=16,
@@ -42,16 +42,14 @@ DAQColumnRenames = {
 }
 # rename columns
 dfDAQ = dfDAQ.rename(columns=DAQColumnRenames)
-
+dfDAQ=dfDAQ.iloc[:-5]
 Time=dfDAQ['Time(s)'].values
-Time=(Time[:116])
 Time_float=np.array([])
 for c in Time:
     Time_str=c.replace(',','.')
     Time_float=np.append(Time_float,float(Time_str))
 
 Charge=dfDAQ['Charge(C)'].values
-Charge=Charge[:116]
 Charge_float=np.array([])
 for c in Charge:
     Charge_str=c.replace(',','.')
@@ -88,14 +86,19 @@ slope, intercept, r_value, p_value, std_err = linregress(time_mid, charge_mid)
 
 print(f"Slope of the fitted line (middle region): ", slope)
 
+
 # --- Step 3: Plot the data and fitted line ---
 plt.figure(figsize=(8,5))
 plt.plot(Time_float, Charge_float, label="Full Data", alpha=0.6)
 plt.plot(time_mid, charge_mid, 'o', label="Middle Region", color='orange')
-plt.plot(time_mid, intercept + slope*time_mid, 'r--', label=f"Fit: y={slope:.3e}x+{intercept:.3e}")
-plt.xlabel("Time")
-plt.ylabel("Charge")
-plt.legend()
+plt.plot(time_mid, intercept + slope*time_mid, 'r--',  label=fr"Fit: $y=\mathbf{{{slope:.3e}}}x + {intercept:.3e}$")
+plt.xlabel("Time(s)")
+plt.ylabel("Charge (C)")
+plt.legend(fontsize=16)
 plt.title("Linear Fit to Middle Slope Region")
+output_path = f"{base_name}.png"
+plt.savefig(output_path, dpi=300, bbox_inches='tight')
 plt.show()
+
+print(f"Plot saved as: {output_path}")
 
