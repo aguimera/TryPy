@@ -47,12 +47,12 @@ from tkinter import filedialog
 # if DataFolder and ExpDef and FileIn:
 
 # %% Load data
-DataFolder = "C:\\Users\\mmartic\\Desktop\\29-10-2025-ExpResistanceOxidesVacuum\\"
-ExpDef = DataFolder + 'RawData\\Copy of Experiments2.ods' #Excel name to use
-TribuId = "'AuPI5878GrGOPI5878G-Nylon6Au Scratched'"
+DataFolder = "S:\\9_Projects\\TRIBOMED\\Data management plan\\Data\\CharacterizationData\\TENGData\\VoltageResistanceData\\LaserCutSamples\\20-11-2025-ExpResistancePTFE\\"
+ExpDef = DataFolder + 'RawData\\Experiments.ods' #Excel name to use
+TribuId = "'Nylon6-PTFE 500 rpm'"
 
 #Takes the pkl generated in LoadExperiments and process it
-FileIn = DataFolder + 'DataSets/Cycles-Copy of Experiments2.pkl'
+FileIn = DataFolder + 'DataSets\\Cycles-Experiments.pkl'
 dfData = pd.read_pickle(FileIn)
 
 #Generate new pdf report called DataSetsAnalysis
@@ -65,6 +65,7 @@ for index, r in dfData.iterrows():
     dfData.loc[index, 'VoltageMax'] = cyData.Voltage.max()
     dfData.loc[index, 'VoltageMin'] = cyData.Voltage.min()
     dfData.loc[index, 'Energy'] = simpson(y=cyData.Power, x=cyData.Time)
+    #dfData.loc[index, 'Power'] = cyData.Power.
     IndHalf = int(r.iTransition)
     dfData.loc[index, 'PositiveSignalEnergy'] = simpson(y=cyData.Power[:IndHalf], x=cyData.Time[:IndHalf])
     dfData.loc[index, 'NegativeSignalEnergy'] = simpson(y=cyData.Power[IndHalf:], x=cyData.Time[IndHalf:])
@@ -115,6 +116,36 @@ fig = ax.get_figure()
 ax.legend()
 PDF.savefig(fig)
 
+# %% POWER DENSITY
+dSel = dfData.query("TribuId == " + TribuId)
+fig, ax = plt.subplots()
+sns.lineplot(data=dSel,
+             x='Req', #'ExpId'
+             y='PositiveSignalEnergy',
+             ax=ax,
+             color= 'red',
+             label='PositiveSignalEnergy')
+sns.lineplot(data=dSel,
+             x='Req',
+             y='NegativeSignalEnergy',
+             ax=ax,
+             color= 'blue',   #(0.5, 0.5, 0.5) #dark gray colour
+             label='NegativeSignalEnergy')
+sns.lineplot(data=dSel,
+             x='Req',
+             y='Energy',
+             ax=ax,
+             color='green',  #(0.8, 0.8, 0.8),# Medium gray color
+             label='Energy')
+
+ax.set_xlabel('Req')
+ax.set_ylabel('Power (W/cm^2)')
+fig.suptitle(r.TribuId)
+fig = ax.get_figure()
+# fig.suptitle(f'Req: {r.Req / 1e6:.2f} MΩ, {r.TribuId}')
+ax.legend()
+PDF.savefig(fig)
+
 # Gráfica para Energia
 # Obtener los nombres de los diferentes valores de ExpId
 # Configurar el gráfico
@@ -131,6 +162,7 @@ ax.legend()
 # plt.xticks(rotation=45)  # Rotar las etiquetas del eje x para una mejor legibilidad
 plt.tight_layout()
 PDF.savefig(fig)
+
 
 # Gráfica para Energia
 # Obtener los nombres de los diferentes valores de ExpId
