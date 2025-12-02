@@ -60,6 +60,7 @@ LoadsDef = DataFolder + 'RawData\\LoadsDescription.ods' #Loads excel to use
 ExpDef = DataFolder + 'RawData\\Experiments.ods' #Excel name to use
 TribuId = "'Nylon6-PTFE 500 rpm'" #TribuID selection from excel name
 
+
 # Output Definitions
 # Creates a PDF in Reports folder with the name LoadReports-ExpDef(previously specified)
 PDF = PdfPages(DataFolder + '\\Reports\\LoadReport-{}.pdf'.format(ExpDef.split('\\')[-1].split('.')[0]))

@@ -51,6 +51,7 @@ DataFolder = "S:\\9_Projects\\TRIBOMED\\Data management plan\\Data\\Characteriza
 ExpDef = DataFolder + 'RawData\\Experiments.ods' #Excel name to use
 TribuId = "'Nylon6-PTFE 500 rpm'"
 
+
 #Takes the pkl generated in LoadExperiments and process it
 FileIn = DataFolder + 'DataSets\\Cycles-Experiments.pkl'
 dfData = pd.read_pickle(FileIn)
