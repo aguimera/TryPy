@@ -162,7 +162,7 @@ for index, r in dfExps.iterrows(): #Para cada fila del último dfExps
         dfCycle.loc[index, 'CurrentMinPosition'] = cyData.Position[imin] #Negative peak position
         dfCycle.loc[index, 'PositivePulseWidth'] = MaxPeakWidth #Positive peak width (s)
         dfCycle.loc[index, 'NegativePulseWidth'] = MinPeakWidth #Negative peak width (s)
-        dfCycle.loc[index, 'PowerMaxPeak'] = cyData.Power.max # Max Value of Power for that cycle
+        dfCycle.loc[index, 'CyPowerMaxPeak'] = cyData.Power.max() # Max Value of Power for that cycle
     # Stack Cycles for all experiments
     dfCycles = pd.concat([dfCycles, dfCycle])
 

@@ -10,6 +10,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from scipy.integrate import simpson
 # from test.handles import Cycle
 from TryPy.PlotData import PlotScalarValues, GenFigure
+from scipy.signal import find_peaks
 import tkinter as tk
 from tkinter import filedialog
 
@@ -63,12 +64,18 @@ PDF = PdfPages(DataFolder + '\\Reports\\DataSetsAnalysis.pdf')
 # %% add new calculations example
 for index, r in dfData.iterrows():
     cyData = r.Data
+    # Detect positive and negative peaks
+    noise_threshold = 0.3  # Only consider peaks higher than ±0.3 volts
+    PowerPeaks_max, _ = find_peaks(cyData.Power, height=noise_threshold)
     dfData.loc[index, 'VoltageMax'] = cyData.Voltage.max()
     dfData.loc[index, 'VoltageMin'] = cyData.Voltage.min()
     dfData.loc[index, 'Energy'] = simpson(y=cyData.Power, x=cyData.Time)
     IndHalf = int(r.iTransition)
     dfData.loc[index, 'PositiveSignalEnergy'] = simpson(y=cyData.Power[:IndHalf], x=cyData.Time[:IndHalf])
     dfData.loc[index, 'NegativeSignalEnergy'] = simpson(y=cyData.Power[IndHalf:], x=cyData.Time[IndHalf:])
+
+dfCycle.CyPowerMaxPeak.mean()
+
 
 
 # %% Plot experiments comparison
@@ -121,25 +128,12 @@ dSel = dfData.query("TribuId == " + TribuId)
 fig, ax = plt.subplots()
 sns.lineplot(data=dSel,
              x='Req', #'ExpId'
-             y='PositiveSignalEnergy',
+             y='PowerMaxPeaks',
              ax=ax,
              color= 'red',
-             label='PositiveSignalEnergy')
-sns.lineplot(data=dSel,
-             x='Req',
-             y='NegativeSignalEnergy',
-             ax=ax,
-             color= 'blue',   #(0.5, 0.5, 0.5) #dark gray colour
-             label='NegativeSignalEnergy')
-sns.lineplot(data=dSel,
-             x='Req',
-             y='Energy',
-             ax=ax,
-             color='green',  #(0.8, 0.8, 0.8),# Medium gray color
-             label='Energy')
-
+             label='Max Power Peak')
 ax.set_xlabel('Req')
-ax.set_ylabel('Power (W/cm^2)')
+ax.set_ylabel('Power (W)')
 fig.suptitle(r.TribuId)
 fig = ax.get_figure()
 # fig.suptitle(f'Req: {r.Req / 1e6:.2f} MΩ, {r.TribuId}')
@@ -354,6 +348,18 @@ for exp_id, dExp in dSel.groupby('ExpId'):
     PDF.savefig(fig)
     plt.close(fig)
 
+# Power Peaks Values vs Cycle Plot Analysis
+dSel = dfData
+for exp_id, dExp in dSel.groupby('ExpId'):
+    fig, ax = plt.subplots()
+    ax.scatter(dExp['Cycle'], dExp['CyPowerMaxPeak'], label='Power Peak Width', color='blue', marker='o')
+    ax.set_xlabel('Cycle Number')
+    ax.set_ylabel('Power(W)')
+    ax.set_title(f'Power Peak Max per cycle - ExpId: {exp_id}')
+    ax.legend()
+    fig.tight_layout()
+    PDF.savefig(fig)
+    plt.close(fig)
 
 
 #%% Statistical Analysis Plots
