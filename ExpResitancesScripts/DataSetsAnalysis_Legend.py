@@ -49,7 +49,7 @@ from tkinter import filedialog
 # %% Load data
 DataFolder = "S:\\9_Projects\\TRIBOMED\\Data management plan\\Data\\CharacterizationData\\TENGData\\VoltageResistanceData\\LaserCutSamples\\20-11-2025-ExpResistancePTFE\\"
 ExpDef = DataFolder + 'RawData\\Experiments.ods' #Excel name to use
-TribuId = "'Nylon6-PTFE 500 rpm'"
+TribuId = "'Nylon6-PTFE MoS2'"
 
 
 #Takes the pkl generated in LoadExperiments and process it
@@ -66,7 +66,6 @@ for index, r in dfData.iterrows():
     dfData.loc[index, 'VoltageMax'] = cyData.Voltage.max()
     dfData.loc[index, 'VoltageMin'] = cyData.Voltage.min()
     dfData.loc[index, 'Energy'] = simpson(y=cyData.Power, x=cyData.Time)
-    #dfData.loc[index, 'Power'] = cyData.Power.
     IndHalf = int(r.iTransition)
     dfData.loc[index, 'PositiveSignalEnergy'] = simpson(y=cyData.Power[:IndHalf], x=cyData.Time[:IndHalf])
     dfData.loc[index, 'NegativeSignalEnergy'] = simpson(y=cyData.Power[IndHalf:], x=cyData.Time[IndHalf:])
