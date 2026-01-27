@@ -48,9 +48,9 @@ from tkinter import filedialog
 # if DataFolder and ExpDef and FileIn:
 
 # %% Load data
-DataFolder = "S:\\9_Projects\\TRIBOMED\\Data management plan\\Data\\CharacterizationData\\TENGData\\VoltageResistanceData\\LaserCutSamples\\20-11-2025-ExpResistancePTFE\\"
+DataFolder = "S:\\9_Projects\\TRIBOMED\\Data management plan\\Data\\CharacterizationData\\TENGData\\VoltageResistanceData\\LaserCutSamples\\20-11-2025-ExpResistancePTFE\\\\"
 ExpDef = DataFolder + 'RawData\\Experiments.ods' #Excel name to use
-TribuId = "'Nylon6-PTFE MoS2'"
+TribuId = "'PTFE PEO - Nylon 6 white'"
 
 
 #Takes the pkl generated in LoadExperiments and process it
@@ -74,7 +74,7 @@ for index, r in dfData.iterrows():
     dfData.loc[index, 'PositiveSignalEnergy'] = simpson(y=cyData.Power[:IndHalf], x=cyData.Time[:IndHalf])
     dfData.loc[index, 'NegativeSignalEnergy'] = simpson(y=cyData.Power[IndHalf:], x=cyData.Time[IndHalf:])
 
-dfCycle.CyPowerMaxPeak.mean()
+#dfCycle.CyPowerMaxPeak.mean()
 
 
 
@@ -123,22 +123,22 @@ fig = ax.get_figure()
 ax.legend()
 PDF.savefig(fig)
 
-# %% POWER DENSITY
-dSel = dfData.query("TribuId == " + TribuId)
-fig, ax = plt.subplots()
-sns.lineplot(data=dSel,
-             x='Req', #'ExpId'
-             y='PowerMaxPeaks',
-             ax=ax,
-             color= 'red',
-             label='Max Power Peak')
-ax.set_xlabel('Req')
-ax.set_ylabel('Power (W)')
-fig.suptitle(r.TribuId)
-fig = ax.get_figure()
-# fig.suptitle(f'Req: {r.Req / 1e6:.2f} MΩ, {r.TribuId}')
-ax.legend()
-PDF.savefig(fig)
+# # %% POWER DENSITY
+# dSel = dfData.query("TribuId == " + TribuId)
+# fig, ax = plt.subplots()
+# sns.lineplot(data=dSel,
+#              x='Req', #'ExpId'
+#              y='PowerMaxPeaks',
+#              ax=ax,
+#              color= 'red',
+#              label='Max Power Peak')
+# ax.set_xlabel('Req')
+# ax.set_ylabel('Power (W)')
+# fig.suptitle(r.TribuId)
+# fig = ax.get_figure()
+# # fig.suptitle(f'Req: {r.Req / 1e6:.2f} MΩ, {r.TribuId}')
+# ax.legend()
+# PDF.savefig(fig)
 
 # Gráfica para Energia
 # Obtener los nombres de los diferentes valores de ExpId
@@ -240,7 +240,7 @@ VarColors = {
 
 dSel = dfData
 #dSel = dfData.query("TribuId == 'SwTENG-RF2' ")
-
+saved_rows = []
 for ex, dExp in dSel.groupby('ExpId'):
     fig, (axtime, axpos) = plt.subplots(2, 1, figsize=(11, 7))
     for gn, df in dExp.groupby('RloadId'):
@@ -261,77 +261,25 @@ for ex, dExp in dSel.groupby('ExpId'):
                 else:
                     ptdata = Data[var]
                 ax.plot(Data['Time'], ptdata, **VarColors[var]['LineKwarg']) #MAIN PLOTTING LINE
-                #Plot the line that separates the positive/negative peaks
-                #ax.axvline(x=r.tTransition, color='y')
-                #ax.set_xlabel('Time[s]',fontsize=15)
 
+                #Save the voltage and time data of a cycle for Req=100 in a new DataFrame
                 axtime.set_xlabel('Time [s]', fontsize=15)
                 axtime.tick_params(axis='both', labelsize=15)
 
         line = axtime.plot([], [], label=VarColors['Voltage']['Label'], **VarColors['Voltage']['LineKwarg'])[0]  # modify
         legend_elements.append(line)  # modify
-        line = axtime.plot([], [], label=VarColors['CurrentRC']['Label'], **VarColors['CurrentRC']['LineKwarg'])[0]  # modify
-        legend_elements.append(line)  # modify
+        # line = axtime.plot([], [], label=VarColors['Current']['Label'], **VarColors['Current']['LineKwarg'])[0]  # modify
+        # legend_elements.append(line)  # modify
         line = axtime.plot([], [], label=VarColors['Position']['Label'], **VarColors['Position']['LineKwarg'])[0]  # modify
         legend_elements.append(line)  # modify
 
         axtime.legend(handles=legend_elements, fontsize=15)  # modify
-
-
-
-        # # plot position traces
-        # AxsDict, _ = GenFigure(dfData=df.iloc[0].Data,
-        #                        xVar='Position',
-        #                        PlotColumns=VarColors,
-        #                        axisFactor=0.15,
-        #                        ax=axpos)
-        # for index, r in df.iterrows():
-        #     Data = r.Data
-        #     for var, ax in AxsDict.items():
-        #         if 'Factor' in VarColors[var]:
-        #             ptdata = Data[var] * VarColors[var]['Factor']
-        #         else:
-        #             ptdata = Data[var]
-        #         ax.plot(Data['Position'], ptdata, **VarColors[var]['LineKwarg'])
-        #     ax.set_xlabel('Position')
-        #     ax.set_xlim(0, 2)
-        #
 
         fig.suptitle(f'Experiment: {r.ExpId}, Tribu: {r.TribuId}, Rload: {r.RloadId}, Req: {r.Req}')
         fig.tight_layout()
         PDF.savefig(fig)
         plt.close(fig)
 
-#%% Pulse Width Analysis
-
-# # Peaks detection Plot
-# dSel = dfData
-# for exp_id, dExp in dSel.groupby('ExpId'):
-#     # Crear figura con 2 filas y 3 columnas de subplots
-#     fig, axs = plt.subplots(2, 3, figsize=(15, 10))  # Puedes ajustar el tamaño con figsize
-#     for gn, df in dExp.groupby('RloadId'):
-#         # Acceder a cada subplot con axs[fila][columna]
-#         C0=0
-#         data = df.loc[df.Cycle[0], 'Data']
-#         axs[0, 0].plot(data['Time'],data['Current'])  # Fila 0, Columna 0
-#         axs[0, 0].plot(df['CurrentMaxTime'], df['CurrentMax'])  # Fila 0, Columna 0
-#
-#         # Cend = len(dfData['Cycle'])
-#         axs[0, 1].plot([], [])  # Fila 0, Columna 1
-#         axs[0, 1].plot([], [])  # Fila 0, Columna 1
-#
-#         axs[0, 2].plot([], [])  # Fila 0, Columna 2
-#         axs[1, 0].plot([], [])  # Fila 1, Columna 0
-#         axs[1, 1].plot([], [])  # Fila 1, Columna 1
-#         axs[1, 2].plot([], [])  # Fila 1, Columna 2
-#
-#     # Mostrar gráfico
-# plt.show()
-# fig.tight_layout()
-# PDF.savefig(fig)
-# plt.close(fig)
-#
-#
 
 
 #Peaks Values vs Cycle Plot Analysis

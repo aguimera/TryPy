@@ -56,11 +56,11 @@ VarColors = {
     #            # 'Limits': (-0.3, 0.3),
     #             'Label': 'Velocity [m/s]'
     #             },
-    'Power': {'LineKwarg': {'color': 'purple',
-                           },
-             'Factor': 1e6,
-             # 'Limits': (0, 1000),
-             'Label': 'Power [uW]'},
+    # 'Power': {'LineKwarg': {'color': 'purple',
+    #                        },
+    #          'Factor': 1e6,
+    #          # 'Limits': (0, 1000),
+    #          'Label': 'Power [uW]'},
 
 
 }
