@@ -50,7 +50,7 @@ from tkinter import filedialog
 # %% Load data
 DataFolder = "S:\\9_Projects\\TRIBOMED\\Data management plan\\Data\\CharacterizationData\\TENGData\\VoltageResistanceData\\LaserCutSamples\\20-11-2025-ExpResistancePTFE\\\\"
 ExpDef = DataFolder + 'RawData\\Experiments.ods' #Excel name to use
-TribuId = "'PTFE PEO - Nylon 6 white'"
+TribuId = "'PTFE Commercial - Nylon 6 white- p20 1000 rpm'"
 
 
 #Takes the pkl generated in LoadExperiments and process it

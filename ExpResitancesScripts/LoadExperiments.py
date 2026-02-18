@@ -58,7 +58,7 @@ DataFolder = "S:\\9_Projects\\TRIBOMED\\Data management plan\\Data\\Characteriza
 DataDir = DataFolder + 'RawData\\'
 LoadsDef = DataFolder + 'RawData\\LoadsDescription.ods' #Loads excel to use
 ExpDef = DataFolder + 'RawData\\Experiments.ods' #Excel name to use
-TribuId = "'PTFE PEO - Nylon 6 white'" #TribuID selection from excel name
+TribuId = "'PTFE Commercial - Nylon 6 white- p20 1000 rpm'" #TribuID selection from excel name
 
 
 # Output Definitions

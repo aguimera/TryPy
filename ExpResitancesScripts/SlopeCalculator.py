@@ -41,11 +41,14 @@ with PdfPages(pdf_path) as pdf:
     # ========= OVERLAPPED FIGURE =========
     fig_all, ax_all = plt.subplots(figsize=(9,6))
 
-    for file in DaqFiles:
+    colors = plt.cm.viridis(np.linspace(0, 1, len(DaqFiles)))  # Generate unique colors for each file
+
+    for idx, file in enumerate(DaqFiles):
 
         base_name = os.path.splitext(os.path.basename(file))[0]
 
         dfDAQ = pd.read_csv(
+
             file,
             header=16,
             index_col=False,
@@ -93,13 +96,15 @@ with PdfPages(pdf_path) as pdf:
         # =========================
         fig, ax = plt.subplots(figsize=(8,5))
 
-        ax.plot(Time_float, Charge_float, alpha=0.6, label="Full Data")
-        ax.plot(time_mid, charge_mid, 'o', color='orange', label="Fit region")
+        color = colors[idx]  # Assign unique color for this file
+        ax.plot(Time_float, Charge_float, alpha=0.6, label="Full Data", color=color)
+        ax.plot(time_mid, charge_mid, 'o', label="Fit region", color=color)
         ax.plot(
             time_mid,
             intercept + slope*time_mid,
             'r--',
-            label=fr"Slope = {slope:.3e}"
+            label=fr"Slope = {slope:.3e}",
+            color=color  # Use the same color for the fit line
         )
 
         ax.set_xlabel("Time (s)")
@@ -114,12 +119,13 @@ with PdfPages(pdf_path) as pdf:
         # =========================
         # ADD TO OVERLAPPED FIGURE
         # =========================
-        ax_all.plot(Time_float, Charge_float, alpha=0.4)
+        ax_all.plot(Time_float, Charge_float, alpha=0.4, color=color)
         ax_all.plot(
             time_mid,
             intercept + slope*time_mid,
             linewidth=2,
-            label=f"{base_name} | slope={slope:.2e}"
+            label=f"{base_name} | slope={slope:.2e}",
+            color=color  # Use the same color for the fit line
         )
 
     # ========= FINAL OVERLAPPED PAGE =========
@@ -128,6 +134,7 @@ with PdfPages(pdf_path) as pdf:
     ax_all.set_title("Overlapped Charge Curves with Linear Fits")
     ax_all.legend(fontsize=9)
     ax_all.grid(True)
+    
 
     pdf.savefig(fig_all)
     plt.close(fig_all)
