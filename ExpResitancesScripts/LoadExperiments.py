@@ -58,7 +58,7 @@ DataFolder = "S:\\9_Projects\\TRIBOMED\\Data management plan\\Data\\Characteriza
 DataDir = DataFolder + 'RawData\\'
 LoadsDef = DataFolder + 'RawData\\LoadsDescription.ods' #Loads excel to use
 ExpDef = DataFolder + 'RawData\\Experiments.ods' #Excel name to use
-TribuId = "'PTFE Commercial - Nylon 6 white- p20 1000 rpm'" #TribuID selection from excel name
+TribuId = "'PTFE chip Gun charged - Nylon 6 white'" #TribuID selection from excel name
 
 
 # Output Definitions
@@ -178,10 +178,10 @@ for index, r in dfExps.iterrows(): #Para cada fila del último dfExps
             ptdata = dfData[var]
         ax.plot(dfData[XVar], ptdata, **VarColors[var]['LineKwarg']) # Plotea cada columna
 
-    for index, r in dfCycle.iterrows():    # Generates yellow separation lines to start, end of the cycles
-       ax.axvline(x=r.tStart, color='y', linewidth=0.5)
-       ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=0.5)
-       ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=0.5)
+    # for index, r in dfCycle.iterrows():    # Generates yellow separation lines to start, end of the cycles
+    #    ax.axvline(x=r.tStart, color='y', linewidth=0.5)
+    #    ax.axvline(x=r.tEnd, color='y', linestyle='-.', linewidth=0.5)
+    #    ax.axvline(x=r.tStart + r.tTransition, color='y', linestyle='--', linewidth=0.5)
 
     fig = ax.get_figure()
     fig.suptitle(r.ExpId)

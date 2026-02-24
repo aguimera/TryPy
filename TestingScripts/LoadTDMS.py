@@ -55,8 +55,9 @@ with PdfPages(pdf_path) as pdf:
 
         # Individual plot
         fig, ax = plt.subplots(figsize=(10, 6))
-        mid_index = len(time) -12998
-        ax.plot(time[mid_index:], voltage[mid_index:])
+        # mid_index = len(time) -12998
+        # ax.plot(time[mid_index:], voltage[mid_index:])
+        ax.plot(time, voltage)
         ax.set_xlabel("Time [s]" if dt else "Samples")
         ax.set_ylabel("Voltage [V]")
         ax.set_title(f"Voltage vs Time - {os.path.basename(file_path)}")
@@ -66,7 +67,8 @@ with PdfPages(pdf_path) as pdf:
         plt.close(fig)
 
         # Add to combined plot with transparency
-        combined_ax.plot(time[mid_index:], voltage[mid_index:], label=os.path.basename(file_path), alpha=0.7)
+        # combined_ax.plot(time[mid_index:], voltage[mid_index:], label=os.path.basename(file_path), alpha=0.7)
+        combined_ax.plot(time, voltage, label=os.path.basename(file_path), alpha=0.7)
     combined_ax.legend()
     pdf.savefig(combined_fig)
     plt.close(combined_fig)
