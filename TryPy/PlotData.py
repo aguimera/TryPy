@@ -27,13 +27,13 @@ VarColors = {
     #            'Label': 'Current RC [uA]'
     #            },
 
-    'Position': {'LineKwarg': {'color': 'k',
-                              # 'linestyle': 'dashed',
-                               'linewidth': 1,
-                               },
-                'Limits': (-2, 30),
-                 'Label': 'Position [mm]'
-                 },
+    # 'Position': {'LineKwarg': {'color': 'k',
+    #                           # 'linestyle': 'dashed',
+    #                            'linewidth': 1,
+    #                            },
+    #             'Limits': (-2, 30),
+    #              'Label': 'Position [mm]'
+    #              },
 
      'Force': {'LineKwarg': {'color': 'g',
                              'linestyle': 'dashed',

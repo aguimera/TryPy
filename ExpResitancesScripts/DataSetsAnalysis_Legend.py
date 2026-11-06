@@ -48,13 +48,12 @@ from tkinter import filedialog
 # if DataFolder and ExpDef and FileIn:
 
 # %% Load data
-DataFolder = "S:\\9_Projects\\TRIBOMED\\Data management plan\\Data\\CharacterizationData\\TENGData\\VoltageResistanceData\\LaserCutSamples\\ExpPDMS\\"
-ExpDef = DataFolder + 'RawData\\Experiments2.ods' #Excel name to use
-TribuId = "'Nylon6-PDMS'"
-
+DataFolder = "S:\\8_Projects\\TRIBOMED\\Data management plan\\Data\\CharacterizationData\\TENGData\\VoltageResistanceData\\3DPrintedPDMS\\"
+ExpDef = DataFolder + 'RawData\\Experiments.ods' #Excel name to use
+TribuId = "'Nylon6MoS22%-PDMS580'"
 
 #Takes the pkl generated in LoadExperiments and process it
-FileIn = DataFolder + 'DataSets\\Cycles-Experiments2.pkl'
+FileIn = DataFolder + 'DataSets\\Cycles-Experiments.pkl'
 dfData = pd.read_pickle(FileIn)
 
 #Generate new pdf report called DataSetsAnalysis

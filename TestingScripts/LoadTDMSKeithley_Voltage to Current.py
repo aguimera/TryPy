@@ -49,7 +49,7 @@ with PdfPages(pdf_path) as pdf:
 
         channel = group.channels()[0]
         voltage = channel[:]
-        current= voltage*100 #Converts to nA
+        current= voltage*1.05e-7 #Converts to uA
 
         dt = channel.properties.get("wf_increment", None)
         time = np.arange(len(voltage)) * dt if dt is not None else np.arange(len(voltage))
@@ -60,7 +60,7 @@ with PdfPages(pdf_path) as pdf:
         # ax.plot(time[mid_index:], voltage[mid_index:])
         ax.plot(time, current)
         ax.set_xlabel("Time [s]" if dt else "Samples")
-        ax.set_ylabel("Current [nA]")
+        ax.set_ylabel("Current [uA]")
         ax.set_title(f"Current vs Time - {os.path.basename(file_path)}")
         ax.grid(True)
 
