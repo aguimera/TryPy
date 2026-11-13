@@ -1,4 +1,5 @@
 import os
+import re
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
@@ -8,162 +9,446 @@ from matplotlib.backends.backend_pdf import PdfPages
 from nptdms import TdmsFile
 
 
-print("Please select input method (Files or Folder)")
+# ============================================================
+# SETTINGS
+# ============================================================
 
-root = tk.Tk()
-root.withdraw()
-root.lift()
-root.attributes("-topmost", True)
+# Fixed voltage display range for every plot
+VOLTAGE_MIN = -10.0
+VOLTAGE_MAX = 10.0
 
-# Ask the user to select individual files or a folder
-choice = messagebox.askyesno(
-    "Select Input Type",
-    "Do you want to select individual files?\n\n"
-    "(Click 'Yes' for files, 'No' for a whole folder)"
-)
+# Set True to search selected folder and all its subfolders
+SEARCH_SUBFOLDERS = False
 
-tdms_paths = []
-base_folder = None
+# PDF output filename
+PDF_FILENAME = "raw_voltage_report.pdf"
 
-if choice:
-    # Select one or multiple TDMS files
-    tdms_paths = list(
-        filedialog.askopenfilenames(
-            title="Select TDMS files",
-            filetypes=[("TDMS files", "*.tdms")]
+# Figure size
+FIGURE_SIZE = (12, 6)
+
+# PDF resolution
+PDF_DPI = 200
+
+
+# ============================================================
+# SELECT TDMS FILES OR A FOLDER
+# ============================================================
+
+def select_tdms_files():
+
+    root = tk.Tk()
+    root.withdraw()
+    root.attributes("-topmost", True)
+
+    select_files = messagebox.askyesno(
+        "Select input",
+        "Do you want to select individual TDMS files?\n\n"
+        "Yes: select one or more TDMS files\n"
+        "No: select a folder containing TDMS files"
+    )
+
+    tdms_paths = []
+
+    if select_files:
+
+        tdms_paths = list(
+            filedialog.askopenfilenames(
+                title="Select TDMS files",
+                filetypes=[("TDMS files", "*.tdms")]
+            )
         )
-    )
 
-    if tdms_paths:
-        base_folder = os.path.dirname(tdms_paths[0])
+        output_base = (
+            os.path.dirname(tdms_paths[0])
+            if tdms_paths else None
+        )
 
-else:
-    # Select a folder containing TDMS files
-    folder_path = filedialog.askdirectory(
-        title="Select Folder with TDMS files"
-    )
+    else:
 
-    if folder_path:
-        base_folder = folder_path
-        tdms_paths = [
-            os.path.join(folder_path, f)
-            for f in os.listdir(folder_path)
-            if f.lower().endswith(".tdms")
-        ]
+        folder = filedialog.askdirectory(
+            title="Select folder containing TDMS files"
+        )
 
-root.destroy()
+        output_base = folder or None
 
-# Check whether files were selected
-if not tdms_paths:
-    print("No files selected or no TDMS files found.")
-    raise SystemExit
+        if folder:
 
-print(f"Found {len(tdms_paths)} TDMS files to process.")
+            if SEARCH_SUBFOLDERS:
 
-# Create the report folder
-report_folder = os.path.join(base_folder, "reportsmerged")
+                for current_folder, _, filenames in os.walk(folder):
 
-try:
-    os.makedirs(report_folder, exist_ok=True)
-    pdf_path = os.path.join(report_folder, "all_plots.pdf")
+                    for filename in filenames:
 
-    # Test whether the PDF can be created
-    with open(pdf_path, "wb"):
-        pass
+                        if filename.lower().endswith(".tdms"):
 
-except Exception:
-    print(
-        "Warning: Cannot write to the selected folder. "
-        "Saving to Desktop instead."
-    )
+                            tdms_paths.append(
+                                os.path.join(
+                                    current_folder,
+                                    filename
+                                )
+                            )
 
-    report_folder = os.path.join(
-        os.path.expanduser("~"),
-        "Desktop",
-        "reportsmerged"
-    )
-
-    os.makedirs(report_folder, exist_ok=True)
-    pdf_path = os.path.join(report_folder, "all_plots.pdf")
-
-
-# Create the PDF report
-with PdfPages(pdf_path) as pdf:
-
-    # Combined plot
-    combined_fig, combined_ax = plt.subplots(figsize=(10, 6))
-
-    combined_ax.set_title("Combined Voltage vs Time")
-    combined_ax.set_xlabel("Time [s]")
-    combined_ax.set_ylabel("Voltage [V]")
-    combined_ax.grid(True)
-
-    # Process files in reverse order
-    for file_path in reversed(tdms_paths):
-
-        print(f"Processing: {os.path.basename(file_path)}")
-
-        try:
-            tdms_file = TdmsFile.read(file_path)
-
-            # Find the first group containing channels
-            group = next(
-                (g for g in tdms_file.groups() if g.channels()),
-                None
-            )
-
-            if group is None:
-                print(f"No channels found in file: {file_path}")
-                continue
-
-            # Read the first channel
-            channel = group.channels()[0]
-            voltage = channel[:]
-
-            # Calculate time from the sampling interval, if available
-            dt = channel.properties.get("wf_increment", None)
-
-            if dt is not None:
-                time = np.arange(len(voltage)) * dt
-                x_label = "Time [s]"
             else:
-                time = np.arange(len(voltage))
-                x_label = "Samples"
 
-            # Create an individual plot
-            fig, ax = plt.subplots(figsize=(10, 6))
+                tdms_paths = [
+                    os.path.join(folder, filename)
+                    for filename in os.listdir(folder)
+                    if filename.lower().endswith(".tdms")
+                ]
 
-            ax.plot(time, voltage)
-            ax.set_xlabel(x_label)
-            ax.set_ylabel("Voltage [V]")
-            ax.set_ylim(-10, 10)  # Fixed voltage axis limits
-            ax.set_title(
-                f"Voltage vs Time - {os.path.basename(file_path)}"
+    root.destroy()
+
+    return sorted(tdms_paths), output_base
+
+
+# ============================================================
+# GET TIME AXIS
+# ============================================================
+
+def get_time_axis(channel, number_of_samples):
+
+    """
+    Use TDMS waveform timing metadata when available.
+    Otherwise, use sample number.
+    """
+
+    properties = channel.properties
+
+    dt = properties.get("wf_increment")
+
+    start_time = properties.get(
+        "wf_start_offset",
+        0.0
+    )
+
+    if dt is not None:
+
+        time = (
+            float(start_time)
+            + np.arange(number_of_samples) * float(dt)
+        )
+
+        return time, "Time [s]", float(dt)
+
+    return np.arange(number_of_samples), "Sample", None
+
+
+# ============================================================
+# ADD ONE CHANNEL PLOT TO THE PDF
+# ============================================================
+
+def add_channel_plot(
+    pdf,
+    filename,
+    group_name,
+    channel,
+    voltage
+):
+
+    time, x_label, dt = get_time_axis(
+        channel,
+        len(voltage)
+    )
+
+    # Create figure
+
+    fig, ax = plt.subplots(
+        figsize=FIGURE_SIZE
+    )
+
+    # Plot raw voltage
+
+    ax.plot(
+        time,
+        voltage,
+        linewidth=0.7,
+        color="tab:blue",
+        label="Raw voltage"
+    )
+
+    # Fixed voltage scale
+
+    ax.set_ylim(
+        VOLTAGE_MIN,
+        VOLTAGE_MAX
+    )
+
+    # Labels
+
+    ax.set_xlabel(x_label)
+
+    ax.set_ylabel("Voltage [V]")
+
+    ax.set_title(
+        f"Raw Voltage - {filename}\n"
+        f"Group: {group_name} | "
+        f"Channel: {channel.name}"
+    )
+
+    ax.grid(True, alpha=0.35)
+
+    ax.legend(loc="upper right")
+
+    # --------------------------------------------------------
+    # MEASUREMENT INFORMATION
+    # --------------------------------------------------------
+
+    details = [
+        f"Samples: {len(voltage):,}",
+        f"Minimum measured voltage: {np.nanmin(voltage):.6g} V",
+        f"Maximum measured voltage: {np.nanmax(voltage):.6g} V"
+    ]
+
+    if dt is not None:
+
+        details.append(
+            f"Sampling interval: {dt:.6g} s"
+        )
+
+        details.append(
+            f"Sampling frequency: {1.0 / dt:.6g} Hz"
+        )
+
+        details.append(
+            f"Record duration: {(len(voltage) - 1) * dt:.6g} s"
+        )
+
+    else:
+
+        details.append(
+            "Sampling interval: not available in TDMS metadata"
+        )
+
+    fig.text(
+        0.08,
+        0.025,
+        " | ".join(details),
+        ha="left",
+        va="bottom",
+        fontsize=8
+    )
+
+    # Adjust layout
+
+    fig.tight_layout(
+        rect=(0, 0.07, 1, 1)
+    )
+
+    # Save current plot as one PDF page
+
+    pdf.savefig(
+        fig,
+        dpi=PDF_DPI
+    )
+
+    # Close figure to save memory
+
+    plt.close(fig)
+
+
+# ============================================================
+# MAIN
+# ============================================================
+
+def main():
+
+    # --------------------------------------------------------
+    # SELECT INPUT FILES
+    # --------------------------------------------------------
+
+    tdms_paths, output_base = select_tdms_files()
+
+    if not tdms_paths:
+
+        print("No TDMS files selected or found.")
+
+        return
+
+    if not output_base:
+
+        print("No output location available.")
+
+        return
+
+    # --------------------------------------------------------
+    # CREATE OUTPUT FOLDER
+    # --------------------------------------------------------
+
+    output_folder = os.path.join(
+        output_base,
+        "raw_voltage_report"
+    )
+
+    os.makedirs(
+        output_folder,
+        exist_ok=True
+    )
+
+    pdf_path = os.path.join(
+        output_folder,
+        PDF_FILENAME
+    )
+
+    total_plots = 0
+
+    failed_files = 0
+
+    print(
+        f"Found {len(tdms_paths)} TDMS file(s)."
+    )
+
+    print(
+        f"PDF report: {pdf_path}"
+    )
+
+    # --------------------------------------------------------
+    # CREATE PDF REPORT
+    # --------------------------------------------------------
+
+    with PdfPages(pdf_path) as pdf:
+
+        # Process every TDMS file
+
+        for file_path in tdms_paths:
+
+            filename = os.path.basename(file_path)
+
+            print(
+                f"\nProcessing: {filename}"
             )
-            ax.grid(True)
 
-            # Save the individual plot to the PDF
-            pdf.savefig(fig)
-            plt.close(fig)
+            try:
 
-            # Add the signal to the combined plot
-            combined_ax.plot(
-                time,
-                voltage,
-                label=os.path.basename(file_path),
-                alpha=0.7
-            )
+                # Read TDMS file
 
-        except Exception as error:
-            print(f"Error processing {file_path}: {error}")
+                tdms_file = TdmsFile.read(
+                    file_path
+                )
 
-    # Save the combined plot
-    handles, labels = combined_ax.get_legend_handles_labels()
+                # Process all groups
 
-    if handles:
-        combined_ax.legend(loc="upper right", fontsize="small")
+                for group in tdms_file.groups():
 
-    pdf.savefig(combined_fig)
-    plt.close(combined_fig)
+                    # Process all channels
 
-print(f"PDF report saved successfully: {pdf_path}")
+                    for channel in group.channels():
+
+                        try:
+
+                            # --------------------------------
+                            # READ RAW VOLTAGE
+                            # --------------------------------
+
+                            voltage = np.asarray(
+                                channel[:],
+                                dtype=float
+                            )
+
+                            if voltage.size == 0:
+
+                                print(
+                                    f"Empty channel '{channel.name}'. "
+                                    "Skipping."
+                                )
+
+                                continue
+
+                            # --------------------------------
+                            # ADD PLOT TO PDF
+                            # --------------------------------
+
+                            add_channel_plot(
+                                pdf=pdf,
+                                filename=filename,
+                                group_name=group.name,
+                                channel=channel,
+                                voltage=voltage
+                            )
+
+                            total_plots += 1
+
+                            print(
+                                f"Added page {total_plots}: "
+                                f"{group.name}/{channel.name}"
+                            )
+
+                        except Exception as error:
+
+                            print(
+                                f"Error processing channel "
+                                f"'{channel.name}': {error}"
+                            )
+
+            except Exception as error:
+
+                failed_files += 1
+
+                print(
+                    f"Error reading {filename}: {error}"
+                )
+
+    # ========================================================
+    # FINISHED
+    # ========================================================
+
+    print("\n====================================")
+
+    print("TDMS PROCESSING FINISHED")
+
+    print("====================================")
+
+    print(
+        f"TDMS files selected: {len(tdms_paths)}"
+    )
+
+    print(
+        f"Plots added to PDF: {total_plots}"
+    )
+
+    print(
+        f"Files with read errors: {failed_files}"
+    )
+
+    print(
+        f"Voltage display range: "
+        f"{VOLTAGE_MIN} V to +{VOLTAGE_MAX} V"
+    )
+
+    print(
+        f"PDF report: {pdf_path}"
+    )
+
+    print("====================================")
+
+    # --------------------------------------------------------
+    # SHOW COMPLETION MESSAGE
+    # --------------------------------------------------------
+
+    if total_plots == 0:
+
+        print(
+            "No channel plots were added to the PDF."
+        )
+
+    else:
+
+        root = tk.Tk()
+        root.withdraw()
+
+        messagebox.showinfo(
+            "Finished",
+            f"PDF report created successfully.\n\n"
+            f"Plots: {total_plots}\n\n"
+            f"Saved to:\n{pdf_path}"
+        )
+
+        root.destroy()
+
+
+# ============================================================
+# RUN PROGRAM
+# ============================================================
+
+if __name__ == "__main__":
+
+    main()
